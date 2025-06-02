@@ -1,0 +1,1804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Serviços</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar {
+            transition: all 0.3s;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .sidebar-text {
+            display: none;
+        }
+        .sidebar.collapsed .logo-text {
+            display: none;
+        }
+        .sidebar.collapsed .menu-item {
+            justify-content: center;
+        }
+        .main-content {
+            transition: all 0.3s;
+            margin-left: 280px;
+        }
+        .main-content.expanded {
+            margin-left: 80px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar .sidebar-text {
+                display: none;
+            }
+            .sidebar .logo-text {
+                display: none;
+            }
+            .sidebar .menu-item {
+                justify-content: center;
+            }
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+        .print-area {
+            display: none;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Sidebar -->
+    <div class="sidebar fixed h-full bg-blue-800 text-white w-80 z-10" id="sidebar">
+        <div class="p-4 flex items-center space-x-2 border-b border-blue-700">
+            <i class="fas fa-tools text-2xl"></i>
+            <span class="logo-text text-xl font-bold">ServiçosPro</span>
+        </div>
+        <div class="p-4 space-y-2">
+            <div class="menu-item flex items-center space-x-3 p-3 rounded hover:bg-blue-700 cursor-pointer" onclick="showSection('dashboard')">
+                <i class="fas fa-home"></i>
+                <span class="sidebar-text">Dashboard</span>
+            </div>
+            <div class="menu-item flex items-center space-x-3 p-3 rounded hover:bg-blue-700 cursor-pointer" onclick="showSection('clientes')">
+                <i class="fas fa-users"></i>
+                <span class="sidebar-text">Clientes</span>
+            </div>
+            <div class="menu-item flex items-center space-x-3 p-3 rounded hover:bg-blue-700 cursor-pointer" onclick="showSection('servicos')">
+                <i class="fas fa-concierge-bell"></i>
+                <span class="sidebar-text">Serviços</span>
+            </div>
+            <div class="menu-item flex items-center space-x-3 p-3 rounded hover:bg-blue-700 cursor-pointer" onclick="showSection('orcamentos')">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span class="sidebar-text">Orçamentos</span>
+            </div>
+            <div class="menu-item flex items-center space-x-3 p-3 rounded hover:bg-blue-700 cursor-pointer" onclick="showSection('recibos')">
+                <i class="fas fa-receipt"></i>
+                <span class="sidebar-text">Recibos</span>
+            </div>
+            <div class="menu-item flex items-center space-x-3 p-3 rounded hover:bg-blue-700 cursor-pointer" onclick="showSection('historico')">
+                <i class="fas fa-history"></i>
+                <span class="sidebar-text">Histórico</span>
+            </div>
+        </div>
+        <div class="absolute bottom-0 w-full p-4 border-t border-blue-700">
+            <div class="flex items-center space-x-3 p-3 rounded hover:bg-blue-700 cursor-pointer" onclick="toggleSidebar()">
+                <i class="fas fa-chevron-left"></i>
+                <span class="sidebar-text">Recolher Menu</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content p-6" id="main-content">
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section">
+            <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Serviços Pendentes</p>
+                            <h2 class="text-3xl font-bold" id="pendentes-count">0</h2>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-clock text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Serviços em Andamento</p>
+                            <h2 class="text-3xl font-bold" id="andamento-count">0</h2>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <i class="fas fa-tools text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-gray-500">Serviços Concluídos</p>
+                            <h2 class="text-3xl font-bold" id="concluidos-count">0</h2>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h2 class="text-xl font-bold mb-4">Últimos Serviços</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="ultimos-servicos">
+                            <!-- Aqui serão carregados os últimos serviços -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clientes Section -->
+        <div id="clientes-section" class="section hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Clientes</h1>
+                <button onclick="showModal('cliente')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Novo Cliente</span>
+                </button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="mb-4">
+                    <input type="text" id="search-cliente" placeholder="Buscar cliente..." class="w-full p-2 border rounded">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="clientes-table">
+                            <!-- Aqui serão carregados os clientes -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Serviços Section -->
+        <div id="servicos-section" class="section hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Serviços</h1>
+                <button onclick="showModal('servico')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Novo Serviço</span>
+                </button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="mb-4 flex space-x-4">
+                    <select id="filter-status" class="p-2 border rounded">
+                        <option value="all">Todos</option>
+                        <option value="pendente">Pendentes</option>
+                        <option value="andamento">Em Andamento</option>
+                        <option value="aguardando">Aguardando Peça</option>
+                        <option value="concluido">Concluídos</option>
+                    </select>
+                    <input type="text" id="search-servico" placeholder="Buscar serviço..." class="w-full p-2 border rounded">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="servicos-table">
+                            <!-- Aqui serão carregados os serviços -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orçamentos Section -->
+        <div id="orcamentos-section" class="section hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Orçamentos</h1>
+                <button onclick="gerarOrcamento()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Novo Orçamento</span>
+                </button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="mb-4">
+                    <input type="text" id="search-orcamento" placeholder="Buscar orçamento..." class="w-full p-2 border rounded">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="orcamentos-table">
+                            <!-- Aqui serão carregados os orçamentos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recibos Section -->
+        <div id="recibos-section" class="section hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Recibos</h1>
+                <button onclick="gerarRecibo()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Novo Recibo</span>
+                </button>
+            </div>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="mb-4">
+                    <input type="text" id="search-recibo" placeholder="Buscar recibo..." class="w-full p-2 border rounded">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="recibos-table">
+                            <!-- Aqui serão carregados os recibos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histórico Section -->
+        <div id="historico-section" class="section hidden">
+            <h1 class="text-2xl font-bold mb-6">Histórico de Serviços</h1>
+            
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="mb-4 flex space-x-4">
+                    <select id="filter-historico" class="p-2 border rounded">
+                        <option value="all">Todos</option>
+                        <option value="pendente">Pendentes</option>
+                        <option value="andamento">Em Andamento</option>
+                        <option value="aguardando">Aguardando Peça</option>
+                        <option value="concluido">Concluídos</option>
+                    </select>
+                    <input type="text" id="search-historico" placeholder="Buscar no histórico..." class="w-full p-2 border rounded">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="historico-table">
+                            <!-- Aqui serão carregados os históricos -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cliente -->
+    <div id="cliente-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold" id="cliente-modal-title">Novo Cliente</h2>
+                <button onclick="hideModal('cliente')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="cliente-form">
+                <input type="hidden" id="cliente-id">
+                <div class="mb-4">
+                    <label for="cliente-nome" class="block text-gray-700 mb-2">Nome</label>
+                    <input type="text" id="cliente-nome" class="w-full p-2 border rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="cliente-telefone" class="block text-gray-700 mb-2">Telefone</label>
+                    <input type="text" id="cliente-telefone" class="w-full p-2 border rounded">
+                </div>
+                <div class="mb-4">
+                    <label for="cliente-email" class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="cliente-email" class="w-full p-2 border rounded">
+                </div>
+                <div class="mb-4">
+                    <label for="cliente-endereco" class="block text-gray-700 mb-2">Endereço</label>
+                    <textarea id="cliente-endereco" class="w-full p-2 border rounded"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="hideModal('cliente')" class="px-4 py-2 border rounded hover:bg-gray-100">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Serviço -->
+    <div id="servico-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold" id="servico-modal-title">Novo Serviço</h2>
+                <button onclick="hideModal('servico')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="servico-form">
+                <input type="hidden" id="servico-id">
+                <div class="mb-4">
+                    <label for="servico-cliente" class="block text-gray-700 mb-2">Cliente</label>
+                    <select id="servico-cliente" class="w-full p-2 border rounded" required>
+                        <option value="">Selecione um cliente</option>
+                        <!-- Clientes serão carregados aqui -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="servico-descricao" class="block text-gray-700 mb-2">Descrição</label>
+                    <textarea id="servico-descricao" class="w-full p-2 border rounded" required></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="servico-valor" class="block text-gray-700 mb-2">Valor (R$)</label>
+                    <input type="number" step="0.01" id="servico-valor" class="w-full p-2 border rounded">
+                </div>
+                <div class="mb-4">
+                    <label for="servico-status" class="block text-gray-700 mb-2">Status</label>
+                    <select id="servico-status" class="w-full p-2 border rounded" required>
+                        <option value="pendente">Pendente</option>
+                        <option value="andamento">Em Andamento</option>
+                        <option value="aguardando">Aguardando Peça</option>
+                        <option value="concluido">Concluído</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="servico-observacoes" class="block text-gray-700 mb-2">Observações</label>
+                    <textarea id="servico-observacoes" class="w-full p-2 border rounded"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="hideModal('servico')" class="px-4 py-2 border rounded hover:bg-gray-100">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Orçamento -->
+    <div id="orcamento-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Novo Orçamento</h2>
+                <div class="flex space-x-2">
+                    <button onclick="imprimirOrcamento()" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    <button onclick="hideModal('orcamento')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="orcamento-cliente" class="block text-gray-700 mb-2">Cliente</label>
+                <select id="orcamento-cliente" class="w-full p-2 border rounded" required>
+                    <option value="">Selecione um cliente</option>
+                    <!-- Clientes serão carregados aqui -->
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="orcamento-servico" class="block text-gray-700 mb-2">Serviço</label>
+                <select id="orcamento-servico" class="w-full p-2 border rounded" required>
+                    <option value="">Selecione um serviço</option>
+                    <!-- Serviços serão carregados aqui -->
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="orcamento-valor" class="block text-gray-700 mb-2">Valor (R$)</label>
+                <input type="number" step="0.01" id="orcamento-valor" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label for="orcamento-validade" class="block text-gray-700 mb-2">Validade (dias)</label>
+                <input type="number" id="orcamento-validade" class="w-full p-2 border rounded" value="7">
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="hideModal('orcamento')" class="px-4 py-2 border rounded hover:bg-gray-100">Cancelar</button>
+                <button type="button" onclick="salvarOrcamento()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
+            </div>
+            
+            <!-- Área de impressão do orçamento -->
+            <div id="orcamento-print" class="print-area mt-6 p-6 border rounded hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold">ORÇAMENTO</h2>
+                    <p class="text-gray-600">Nº: <span id="orcamento-numero-print">0001</span></p>
+                </div>
+                <div class="mb-6">
+                    <p><strong>Cliente:</strong> <span id="orcamento-cliente-print">Nome do Cliente</span></p>
+                    <p><strong>Data:</strong> <span id="orcamento-data-print">01/01/2023</span></p>
+                    <p><strong>Validade:</strong> <span id="orcamento-validade-print">7 dias</span></p>
+                </div>
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold mb-2">Descrição do Serviço</h3>
+                    <!-- Conteúdo principal -->
+            <div class="flex-1 p-8 overflow-auto">
+                <!-- Seções -->
+                <section id="dashboard">
+                    <h2 class="text-2xl font-bold mb-4">Dashboard</h2>
+                    
+                    <!-- Cards de status -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-yellow-100 text-yellow-500 mr-4">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Serviços Pendentes</p>
+                                    <p id="pendentes-count" class="text-2xl font-bold">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 text-blue-500 mr-4">
+                                    <i class="fas fa-tools"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Em Andamento</p>
+                                    <p id="andamento-count" class="text-2xl font-bold">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 text-green-500 mr-4">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Concluídos</p>
+                                    <p id="concluidos-count" class="text-2xl font-bold">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Últimos serviços -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b">
+                            <h3 class="text-lg font-semibold">Últimos Serviços</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ultimos-servicos" class="bg-white divide-y divide-gray-200">
+                                    <!-- Preenchido dinamicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="clientes" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">Clientes</h2>
+                    <p class="text-xl font-bold" id="orcamento-valor-print">R$ 0,00</p>
+                </div>
+                <div class="mt-8 pt-4 border-t text-center">
+                    <p>___________________________________</p>
+                    <p>Assinatura</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Recibo -->
+    <div id="recibo-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Novo Recibo</h2>
+                <div class="flex space-x-2">
+                    <button onclick="imprimirRecibo()" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    <button onclick="hideModal('recibo')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label for="recibo-cliente" class="block text-gray-700 mb-2">Cliente</label>
+                <select id="recibo-cliente" class="w-full p-2 border rounded" required>
+                    <option value="">Selecione um cliente</option>
+                    <!-- Clientes serão carregados aqui -->
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="recibo-servico" class="block text-gray-700 mb-2">Serviço</label>
+                <select id="recibo-servico" class="w-full p-2 border rounded" required>
+                    <option value="">Selecione um serviço</option>
+                    <!-- Serviços serão carregados aqui -->
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="recibo-valor" class="block text-gray-700 mb-2">Valor (R$)</label>
+                <input type="number" step="0.01" id="recibo-valor" class="w-full p-2 border rounded" required>
+            </div>
+            <div class="mb-4">
+                <label for="recibo-forma-pagamento" class="block text-gray-700 mb-2">Forma de Pagamento</label>
+                <select id="recibo-forma-pagamento" class="w-full p-2 border rounded">
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="Cartão">Cartão</option>
+                    <option value="PIX">PIX</option>
+                    <option value="Transferência">Transferência</option>
+                </select>
+            </div>
+            <div class="flex justify-end space-x-2">
+                <button type="button" onclick="hideModal('recibo')" class="px-4 py-2 border rounded hover:bg-gray-100">Cancelar</button>
+                <button type="button" onclick="salvarRecibo()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Salvar</button>
+            </div>
+            
+            <!-- Área de impressão do recibo -->
+            <div id="recibo-print" class="print-area mt-6 p-6 border rounded hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold">RECIBO</h2>
+                    <p class="text-gray-600">Nº: <span id="recibo-numero-print">0001</span></p>
+                </div>
+                <div class="mb-6">
+                    <p>Recebi(emos) de <strong><span id="recibo-cliente-print">Nome do Cliente</span></strong></p>
+                    <p>a quantia de <strong>R$ <span id="recibo-valor-extenso-print">Zero reais</span></strong></p>
+                    <p>referente a <strong><span id="recibo-descricao-print">serviço prestado</span></strong></p>
+                    <p>Forma de pagamento: <strong><span id="recibo-forma-pagamento-print">Dinheiro</span></strong></p>
+                </div>
+                <div class="mt-8 pt-4 border-t">
+                    <p class="text-center">___________________________________</p>
+                    <p class="text-center">Emitente</p>
+                </div>
+                <div class="mt-4 text-right">
+                    <p><span id="recibo-data-print">01/01/2023</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Supabase
+        const supabaseUrl = 'https://bnyhgginbhsjeilcclzf.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJueWhnZ2luYmhzamVpbGNjbHpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4ODc2MTUsImV4cCI6MjA2NDQ2MzYxNX0.TnW7d8rcCIDuFOszn-wad2rs40QJqKhrplEye0qXAVA';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // Variáveis globais
+        let clientes = [];
+        let servicos = [];
+        let orcamentos = [];
+        let recibos = [];
+        let historico = [];
+
+        // Função para atualizar o dashboard
+        function atualizarDashboard() {
+            try {
+                // Contadores para os diferentes status
+                const pendentes = servicos.filter(s => s.status === 'pendente').length;
+                const andamento = servicos.filter(s => s.status === 'andamento').length;
+                const concluidos = servicos.filter(s => s.status === 'concluido').length;
+                
+                // Atualizar contadores no dashboard
+                document.getElementById('pendentes-count').textContent = pendentes;
+                document.getElementById('andamento-count').textContent = andamento;
+                document.getElementById('concluidos-count').textContent = concluidos;
+                
+                // Atualizar tabela de últimos serviços
+                const ultimosServicos = [...servicos].sort((a, b) => {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                }).slice(0, 5); // Pegar os 5 mais recentes
+                
+                const tbody = document.getElementById('ultimos-servicos');
+                if (!tbody) {
+                    console.error('Elemento ultimos-servicos não encontrado');
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                ultimosServicos.forEach(servico => {
+                    const tr = document.createElement('tr');
+                    const statusClass = {
+                        'pendente': 'text-yellow-600',
+                        'andamento': 'text-blue-600',
+                        'aguardando': 'text-orange-600',
+                        'concluido': 'text-green-600'
+                    }[servico.status] || '';
+                    
+                    const statusText = {
+                        'pendente': 'Pendente',
+                        'andamento': 'Em Andamento',
+                        'aguardando': 'Aguardando Peça',
+                        'concluido': 'Concluído'
+                    }[servico.status] || 'Desconhecido';
+                    
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">${servico.clientes?.nome || 'Cliente não encontrado'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${servico.descricao}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="${statusClass} font-medium">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">${new Date(servico.created_at).toLocaleDateString()}</td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Erro ao atualizar dashboard:', error);
+            }
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                // Carrega dados iniciais
+                carregarClientes();
+                carregarServicos(); // Esta função já chama atualizarDashboard()
+                carregarOrcamentos();
+                carregarRecibos();
+                carregarHistorico();
+                
+                // Mostra a seção de dashboard por padrão
+                showSection('dashboard');
+                
+                // Configura listeners para os campos de filtro
+                const searchCliente = document.getElementById('search-cliente');
+                if (searchCliente) searchCliente.addEventListener('input', filtrarClientes);
+                
+                const searchServico = document.getElementById('search-servico');
+                const filterStatus = document.getElementById('filter-status');
+                if (searchServico) searchServico.addEventListener('input', filtrarServicos);
+                if (filterStatus) filterStatus.addEventListener('change', filtrarServicos);
+                
+                const searchOrcamento = document.getElementById('search-orcamento');
+                if (searchOrcamento) searchOrcamento.addEventListener('input', filtrarOrcamentos);
+                
+                const searchRecibo = document.getElementById('search-recibo');
+                if (searchRecibo) searchRecibo.addEventListener('input', filtrarRecibos);
+                
+                const searchHistorico = document.getElementById('search-historico');
+                const filterHistorico = document.getElementById('filter-historico');
+                if (searchHistorico) searchHistorico.addEventListener('input', filtrarHistorico);
+                if (filterHistorico) filterHistorico.addEventListener('change', filtrarHistorico);
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+            }
+            
+            // Configura listeners para os formulários
+            document.getElementById('cliente-form').addEventListener('submit', salvarCliente);
+            document.getElementById('servico-form').addEventListener('submit', salvarServico);
+            
+            // Configura listeners para busca
+            document.getElementById('search-cliente').addEventListener('input', filtrarClientes);
+            document.getElementById('search-servico').addEventListener('input', filtrarServicos);
+            document.getElementById('search-orcamento').addEventListener('input', filtrarOrcamentos);
+            document.getElementById('search-recibo').addEventListener('input', filtrarRecibos);
+            document.getElementById('search-historico').addEventListener('input', filtrarHistorico);
+            
+            // Configura listeners para filtros
+            document.getElementById('filter-status').addEventListener('change', filtrarServicos);
+            document.getElementById('filter-historico').addEventListener('change', filtrarHistorico);
+        });
+
+        // Funções para mostrar/esconder seções
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(el => {
+                el.classList.add('hidden');
+            });
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+        }
+
+        // Funções para mostrar/esconder modais
+        function showModal(type) {
+            document.getElementById(`${type}-modal`).classList.remove('hidden');
+            
+            if (type === 'cliente') {
+                document.getElementById('cliente-modal-title').textContent = 'Novo Cliente';
+                document.getElementById('cliente-form').reset();
+                document.getElementById('cliente-id').value = '';
+            } else if (type === 'servico') {
+                document.getElementById('servico-modal-title').textContent = 'Novo Serviço';
+                document.getElementById('servico-form').reset();
+                document.getElementById('servico-id').value = '';
+                carregarClientesNoSelect('servico-cliente');
+            }
+        }
+
+        function hideModal(type) {
+            document.getElementById(`${type}-modal`).classList.add('hidden');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        }
+
+        // Funções para editar clientes/serviços
+        function editarCliente(id) {
+            const cliente = clientes.find(c => c.id === id);
+            if (cliente) {
+                document.getElementById('cliente-modal-title').textContent = 'Editar Cliente';
+                document.getElementById('cliente-id').value = cliente.id;
+                document.getElementById('cliente-nome').value = cliente.nome;
+                document.getElementById('cliente-telefone').value = cliente.telefone || '';
+                document.getElementById('cliente-email').value = cliente.email || '';
+                document.getElementById('cliente-endereco').value = cliente.endereco || '';
+                
+                showModal('cliente');
+            }
+        }
+
+        function editarServico(id) {
+            const servico = servicos.find(s => s.id === id);
+            if (servico) {
+                document.getElementById('servico-modal-title').textContent = 'Editar Serviço';
+                document.getElementById('servico-id').value = servico.id;
+                document.getElementById('servico-cliente').value = servico.cliente_id;
+                document.getElementById('servico-descricao').value = servico.descricao;
+                document.getElementById('servico-valor').value = servico.valor || '';
+                document.getElementById('servico-status').value = servico.status;
+                document.getElementById('servico-observacoes').value = servico.observacoes || '';
+                
+                showModal('servico');
+            }
+        }
+
+        // Funções para carregar dados do Supabase
+        async function carregarClientes() {
+            try {
+                const { data, error } = await supabase
+                    .from('clientes')
+                    .select('*')
+                    .order('nome', { ascending: true });
+                
+                if (error) throw error;
+                
+                clientes = data || [];
+                renderizarClientes();
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+                alert('Erro ao carregar clientes');
+            }
+        }
+
+        async function carregarServicos() {
+            try {
+                const { data, error } = await supabase
+                    .from('servicos')
+                    .select('*, clientes(nome)')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                servicos = data || [];
+                renderizarServicos();
+                atualizarDashboard();
+            } catch (error) {
+                console.error('Erro ao carregar serviços:', error);
+                alert('Erro ao carregar serviços');
+            }
+        }
+
+        async function carregarOrcamentos() {
+            try {
+                const { data, error } = await supabase
+                    .from('orcamentos')
+                    .select('*, clientes(nome), servicos(descricao)')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                orcamentos = data || [];
+                renderizarOrcamentos();
+            } catch (error) {
+                console.error('Erro ao carregar orçamentos:', error);
+                alert('Erro ao carregar orçamentos');
+            }
+        }
+
+        async function carregarRecibos() {
+            try {
+                const { data, error } = await supabase
+                    .from('recibos')
+                    .select('*, clientes(nome), servicos(descricao)')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                recibos = data || [];
+                renderizarRecibos();
+            } catch (error) {
+                console.error('Erro ao carregar recibos:', error);
+                alert('Erro ao carregar recibos');
+            }
+        }
+        
+        async function carregarHistorico() {
+            try {
+                // O histórico usa os mesmos dados dos serviços já carregados
+                // Não precisamos fazer uma nova consulta ao Supabase
+                // Apenas renderizamos o histórico com os dados dos serviços
+                renderizarHistorico();
+            } catch (error) {
+                console.error('Erro ao carregar histórico:', error);
+                alert('Erro ao carregar histórico');
+            }
+        }
+        
+        // Função para renderizar o histórico de serviços
+        function renderizarHistorico() {
+            try {
+                const tbody = document.getElementById('historico-table');
+                if (!tbody) {
+                    console.error('Elemento historico-table não encontrado');
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                // Ordenar serviços por data (mais recentes primeiro)
+                const servicosOrdenados = [...servicos].sort((a, b) => {
+                    return new Date(b.created_at) - new Date(a.created_at);
+                });
+                
+                servicosOrdenados.forEach(servico => {
+                    const tr = document.createElement('tr');
+                    const statusClass = {
+                        'pendente': 'text-yellow-600',
+                        'andamento': 'text-blue-600',
+                        'aguardando': 'text-orange-600',
+                        'concluido': 'text-green-600'
+                    }[servico.status] || '';
+                    
+                    const statusText = {
+                        'pendente': 'Pendente',
+                        'andamento': 'Em Andamento',
+                        'aguardando': 'Aguardando Peça',
+                        'concluido': 'Concluído'
+                    }[servico.status] || 'Desconhecido';
+                    
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">${servico.clientes?.nome || 'Cliente não encontrado'}</td>
+                        <td class="px-6 py-4">${servico.descricao}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="${statusClass} font-medium">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">${new Date(servico.created_at).toLocaleDateString()}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <button onclick="visualizarServico('${servico.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Erro ao renderizar histórico:', error);
+            }
+        }
+
+        // Funções para renderizar dados nas tabelas
+        function renderizarClientes() {
+            const tbody = document.getElementById('clientes-table');
+            tbody.innerHTML = '';
+            
+            clientes.forEach(cliente => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${cliente.nome}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${cliente.telefone || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${cliente.email || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="editarCliente('${cliente.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="excluirCliente('${cliente.id}')" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderizarServicos() {
+            const tbody = document.getElementById('servicos-table');
+            tbody.innerHTML = '';
+            
+            servicos.forEach(servico => {
+                const statusClass = {
+                    'pendente': 'bg-yellow-100 text-yellow-800',
+                    'andamento': 'bg-blue-100 text-blue-800',
+                    'aguardando': 'bg-orange-100 text-orange-800',
+                    'concluido': 'bg-green-100 text-green-800'
+                }[servico.status] || 'bg-gray-100 text-gray-800';
+                
+                const statusText = {
+                    'pendente': 'Pendente',
+                    'andamento': 'Em Andamento',
+                    'aguardando': 'Aguardando Peça',
+                    'concluido': 'Concluído'
+                }[servico.status] || 'Desconhecido';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${servico.clientes?.nome || 'Cliente não encontrado'}</td>
+                    <td class="px-6 py-4">${servico.descricao}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">${servico.valor ? 'R$ ' + parseFloat(servico.valor).toFixed(2) : '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="editarServico('${servico.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="excluirServico('${servico.id}')" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderizarOrcamentos() {
+            const tbody = document.getElementById('orcamentos-table');
+            tbody.innerHTML = '';
+            
+            orcamentos.forEach(orcamento => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${orcamento.clientes?.nome || 'Cliente não encontrado'}</td>
+                    <td class="px-6 py-4">${orcamento.servicos?.descricao || 'Serviço não encontrado'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">R$ ${parseFloat(orcamento.valor).toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(orcamento.created_at).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="visualizarOrcamento('${orcamento.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="excluirOrcamento('${orcamento.id}')" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderizarRecibos() {
+            const tbody = document.getElementById('recibos-table');
+            tbody.innerHTML = '';
+            
+            recibos.forEach(recibo => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${recibo.clientes?.nome || 'Cliente não encontrado'}</td>
+                    <td class="px-6 py-4">${recibo.servicos?.descricao || 'Serviço não encontrado'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">R$ ${parseFloat(recibo.valor).toFixed(2)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(recibo.created_at).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="visualizarRecibo('${recibo.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="excluirRecibo('${recibo.id}')" class="text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderizarHistorico() {
+            const tbody = document.getElementById('historico-table');
+            tbody.innerHTML = '';
+            
+            historico.forEach(servico => {
+                const statusClass = {
+                    'pendente': 'bg-yellow-100 text-yellow-800',
+                    'andamento': 'bg-blue-100 text-blue-800',
+                    'aguardando': 'bg-orange-100 text-orange-800',
+                    'concluido': 'bg-green-100 text-green-800'
+                }[servico.status] || 'bg-gray-100 text-gray-800';
+                
+                const statusText = {
+                    'pendente': 'Pendente',
+                    'andamento': 'Em Andamento',
+                    'aguardando': 'Aguardando Peça',
+                    'concluido': 'Concluído'
+                }[servico.status] || 'Desconhecido';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${servico.clientes?.nome || 'Cliente não encontrado'}</td>
+                    <td class="px-6 py-4">${servico.descricao}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">${servico.valor ? 'R$ ' + parseFloat(servico.valor).toFixed(2) : '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(servico.created_at).toLocaleDateString()}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <button onclick="editarServico('${servico.id}')" class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Funções para filtrar dados
+        function filtrarClientes() {
+            const termo = document.getElementById('search-cliente').value.toLowerCase();
+            const tbody = document.getElementById('clientes-table');
+            const linhas = tbody.getElementsByTagName('tr');
+            
+            for (let i = 0; i < linhas.length; i++) {
+                const nome = linhas[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+                const telefone = linhas[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+                const email = linhas[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+                
+                if (nome.includes(termo) || telefone.includes(termo) || email.includes(termo)) {
+                    linhas[i].style.display = '';
+                } else {
+                    linhas[i].style.display = 'none';
+                }
+            }
+        }
+
+        function filtrarServicos() {
+            const termo = document.getElementById('search-servico').value.toLowerCase();
+            const filtroStatus = document.getElementById('filter-status').value;
+            const tbody = document.getElementById('servicos-table');
+            const linhas = tbody.getElementsByTagName('tr');
+            
+            for (let i = 0; i < linhas.length; i++) {
+                const cliente = linhas[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+                const descricao = linhas[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+                const status = linhas[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+                
+                const correspondeTermo = cliente.includes(termo) || descricao.includes(termo);
+                const correspondeStatus = filtroStatus === 'all' || status.includes(filtroStatus);
+                
+                if (correspondeTermo && correspondeStatus) {
+                    linhas[i].style.display = '';
+                } else {
+                    linhas[i].style.display = 'none';
+                }
+            }
+        }
+
+        function filtrarOrcamentos() {
+            const termo = document.getElementById('search-orcamento').value.toLowerCase();
+            const tbody = document.getElementById('orcamentos-table');
+            const linhas = tbody.getElementsByTagName('tr');
+            
+            for (let i = 0; i < linhas.length; i++) {
+                const cliente = linhas[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+                const servico = linhas[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+                
+                if (cliente.includes(termo) || servico.includes(termo)) {
+                    linhas[i].style.display = '';
+                } else {
+                    linhas[i].style.display = 'none';
+                }
+            }
+        }
+
+        function filtrarRecibos() {
+            const termo = document.getElementById('search-recibo').value.toLowerCase();
+            const tbody = document.getElementById('recibos-table');
+            const linhas = tbody.getElementsByTagName('tr');
+            
+            for (let i = 0; i < linhas.length; i++) {
+                const cliente = linhas[i].getElementsByTagName('td')[0].textContent.toLowerCase();
+                const servico = linhas[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+                
+                if (cliente.includes(termo) || servico.includes(termo)) {
+                    linhas[i].style.display = '';
+                } else {
+                    linhas[i].style.display = 'none';
+                }
+            }
+        }
+
+        function filtrarHistorico() {
+            try {
+                const termo = document.getElementById('search-historico').value.toLowerCase();
+                const filtroStatus = document.getElementById('filter-historico').value;
+                const tbody = document.getElementById('historico-table');
+                
+                if (!tbody) {
+                    console.error('Elemento historico-table não encontrado');
+                    return;
+                }
+                
+                const linhas = tbody.getElementsByTagName('tr');
+                
+                for (let i = 0; i < linhas.length; i++) {
+                    const colunas = linhas[i].getElementsByTagName('td');
+                    if (colunas.length < 3) continue; // Pula linhas sem colunas suficientes
+                    
+                    const cliente = colunas[0].textContent.toLowerCase();
+                    const servico = colunas[1].textContent.toLowerCase();
+                    const status = colunas[2].textContent.toLowerCase();
+                    
+                    const correspondeTermo = cliente.includes(termo) || servico.includes(termo);
+                    const correspondeStatus = filtroStatus === 'all' || status.includes(filtroStatus);
+                    
+                    if (correspondeTermo && correspondeStatus) {
+                        linhas[i].style.display = '';
+                    } else {
+                        linhas[i].style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao filtrar histórico:', error);
+            }
+        }
+
+        // Funções para salvar dados
+        async function salvarCliente(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('cliente-id').value;
+            const nome = document.getElementById('cliente-nome').value;
+            const telefone = document.getElementById('cliente-telefone').value;
+            const email = document.getElementById('cliente-email').value;
+            const endereco = document.getElementById('cliente-endereco').value;
+            
+            try {
+                if (id) {
+                    // Atualizar cliente existente
+                    const { error } = await supabase
+                        .from('clientes')
+                        .update({ nome, telefone, email, endereco })
+                        .eq('id', id);
+                    
+                    if (error) throw error;
+                    alert('Cliente atualizado com sucesso!');
+                } else {
+                    // Criar novo cliente
+                    const { error } = await supabase
+                        .from('clientes')
+                        .insert([{ nome, telefone, email, endereco }]);
+                    
+                    if (error) throw error;
+                    alert('Cliente cadastrado com sucesso!');
+                }
+                
+                hideModal('cliente');
+                carregarClientes();
+            } catch (error) {
+                console.error('Erro ao salvar cliente:', error);
+                alert('Erro ao salvar cliente');
+            }
+        }
+
+        async function salvarServico(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('servico-id').value;
+            const cliente_id = document.getElementById('servico-cliente').value;
+            const descricao = document.getElementById('servico-descricao').value;
+            const valor = document.getElementById('servico-valor').value;
+            const status = document.getElementById('servico-status').value;
+            const observacoes = document.getElementById('servico-observacoes').value;
+            
+            try {
+                if (id) {
+                    // Atualizar serviço existente
+                    const { error } = await supabase
+                        .from('servicos')
+                        .update({ cliente_id, descricao, valor, status, observacoes })
+                        .eq('id', id);
+                    
+                    if (error) throw error;
+                    alert('Serviço atualizado com sucesso!');
+                } else {
+                    // Criar novo serviço
+                    const { error } = await supabase
+                        .from('servicos')
+                        .insert([{ cliente_id, descricao, valor, status, observacoes }]);
+                    
+                    if (error) throw error;
+                    alert('Serviço cadastrado com sucesso!');
+                }
+                
+                hideModal('servico');
+                carregarServicos();
+            } catch (error) {
+                console.error('Erro ao salvar serviço:', error);
+                alert('Erro ao salvar serviço');
+            }
+        }
+
+        // Funções para excluir dados
+        async function excluirCliente(id) {
+            if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
+            
+            try {
+                // Verificar se o cliente tem serviços associados
+                const { data: servicosCliente, error: errorServicos } = await supabase
+                    .from('servicos')
+                    .select('id')
+                    .eq('cliente_id', id);
+                
+                if (errorServicos) throw errorServicos;
+                
+                if (servicosCliente.length > 0) {
+                    alert('Este cliente possui serviços associados e não pode ser excluído.');
+                    return;
+                }
+                
+                // Excluir o cliente
+                const { error } = await supabase
+                    .from('clientes')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                alert('Cliente excluído com sucesso!');
+                carregarClientes();
+            } catch (error) {
+                console.error('Erro ao excluir cliente:', error);
+                alert('Erro ao excluir cliente');
+            }
+        }
+
+        async function visualizarServico(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('servicos')
+                    .select('*, clientes(*)')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (!data) {
+                    alert('Serviço não encontrado!');
+                    return;
+                }
+                
+                // Preenche os dados do serviço no formulário para edição
+                document.getElementById('servico-id').value = data.id;
+                document.getElementById('servico-cliente').value = data.cliente_id;
+                document.getElementById('servico-descricao').value = data.descricao;
+                document.getElementById('servico-valor').value = data.valor || '';
+                document.getElementById('servico-status').value = data.status;
+                document.getElementById('servico-observacoes').value = data.observacoes || '';
+                
+                // Atualiza o título do modal
+                document.getElementById('servico-modal-title').textContent = 'Editar Serviço';
+                
+                // Mostra o modal
+                showModal('servico');
+            } catch (error) {
+                console.error('Erro ao visualizar serviço:', error);
+                alert('Erro ao visualizar serviço');
+            }
+        }
+        
+        async function excluirServico(id) {
+            if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('servicos')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                alert('Serviço excluído com sucesso!');
+                carregarServicos();
+            } catch (error) {
+                console.error('Erro ao excluir serviço:', error);
+                alert('Erro ao excluir serviço');
+            }
+        }
+
+        async function visualizarOrcamento(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('orcamentos')
+                    .select('*, clientes(*), servicos(*)')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (!data) {
+                    alert('Orçamento não encontrado!');
+                    return;
+                }
+                
+                // Preenche os dados do orçamento no modal de visualização
+                document.getElementById('orcamento-cliente-print').textContent = data.clientes?.nome || 'Cliente não encontrado';
+                document.getElementById('orcamento-data-print').textContent = new Date(data.created_at).toLocaleDateString();
+                document.getElementById('orcamento-descricao-print').textContent = data.servicos?.descricao || 'Serviço não encontrado';
+                document.getElementById('orcamento-valor-print').textContent = `R$ ${parseFloat(data.valor).toFixed(2)}`;
+                document.getElementById('orcamento-observacoes-print').textContent = data.observacoes || '';
+                
+                // Mostra o modal
+                showModal('orcamento-visualizar');
+            } catch (error) {
+                console.error('Erro ao visualizar orçamento:', error);
+                alert('Erro ao visualizar orçamento');
+            }
+        }
+        
+        async function excluirOrcamento(id) {
+            if (!confirm('Tem certeza que deseja excluir este orçamento?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('orcamentos')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                alert('Orçamento excluído com sucesso!');
+                carregarOrcamentos();
+            } catch (error) {
+                console.error('Erro ao excluir orçamento:', error);
+                alert('Erro ao excluir orçamento');
+            }
+        }
+
+        async function visualizarOrcamento(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('orcamentos')
+                    .select('*, clientes(*), servicos(*)')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (!data) {
+                    alert('Orçamento não encontrado!');
+                    return;
+                }
+                
+                // Preenche os dados do orçamento no modal de visualização
+                document.getElementById('orcamento-cliente-print').textContent = data.clientes?.nome || 'Cliente não encontrado';
+                document.getElementById('orcamento-data-print').textContent = new Date(data.created_at).toLocaleDateString();
+                document.getElementById('orcamento-descricao-print').textContent = data.servicos?.descricao || 'Serviço não encontrado';
+                document.getElementById('orcamento-valor-print').textContent = `R$ ${parseFloat(data.valor).toFixed(2)}`;
+                document.getElementById('orcamento-observacoes-print').textContent = data.observacoes || '';
+                
+                // Mostra o modal
+                showModal('orcamento-visualizar');
+            } catch (error) {
+                console.error('Erro ao visualizar orçamento:', error);
+                alert('Erro ao visualizar orçamento');
+            }
+        }
+        
+        async function excluirRecibo(id) {
+            if (!confirm('Tem certeza que deseja excluir este recibo?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('recibos')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                alert('Recibo excluído com sucesso!');
+                carregarRecibos();
+            } catch (error) {
+                console.error('Erro ao excluir recibo:', error);
+                alert('Erro ao excluir recibo');
+            }
+        }
+        
+        async function visualizarRecibo(id) {
+            try {
+                const { data, error } = await supabase
+                    .from('recibos')
+                    .select('*, clientes(*), servicos(*)')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (!data) {
+                    alert('Recibo não encontrado!');
+                    return;
+                }
+                
+                // Preenche os dados do recibo no modal
+                document.getElementById('recibo-cliente-print').textContent = data.clientes?.nome || 'Cliente não encontrado';
+                document.getElementById('recibo-data-print').textContent = new Date(data.created_at).toLocaleDateString();
+                document.getElementById('recibo-descricao-print').textContent = data.servicos?.descricao || 'Serviço não encontrado';
+                document.getElementById('recibo-valor-print').textContent = `R$ ${parseFloat(data.valor).toFixed(2)}`;
+                document.getElementById('recibo-valor-extenso-print').textContent = valorParaExtenso(data.valor);
+                
+                // Mostra o modal
+                showModal('recibo-visualizar');
+            } catch (error) {
+                console.error('Erro ao visualizar recibo:', error);
+                alert('Erro ao visualizar recibo');
+            }
+        }
+
+        // Funções para orçamentos e recibos
+        function gerarOrcamento() {
+            document.getElementById('orcamento-modal').classList.remove('hidden');
+            document.getElementById('orcamento-print').classList.add('hidden');
+            document.getElementById('orcamento-form').reset();
+            
+            carregarClientesNoSelect('orcamento-cliente');
+            carregarServicosNoSelect('orcamento-servico');
+            
+            // Gerar número de orçamento
+            document.getElementById('orcamento-numero-print').textContent = 'ORC' + new Date().getTime().toString().slice(-6);
+        }
+
+        async function salvarOrcamento() {
+            const cliente_id = document.getElementById('orcamento-cliente').value;
+            const servico_id = document.getElementById('orcamento-servico').value;
+            const valor = document.getElementById('orcamento-valor').value;
+            const validade = document.getElementById('orcamento-validade').value;
+            
+            if (!cliente_id || !servico_id || !valor) {
+                alert('Preencha todos os campos obrigatórios');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('orcamentos')
+                    .insert([{ cliente_id, servico_id, valor, validade }]);
+                
+                if (error) throw error;
+                
+                alert('Orçamento salvo com sucesso!');
+                hideModal('orcamento');
+                carregarOrcamentos();
+            } catch (error) {
+                console.error('Erro ao salvar orçamento:', error);
+                alert('Erro ao salvar orçamento');
+            }
+        }
+
+        function imprimirOrcamento() {
+            const cliente = document.getElementById('orcamento-cliente').options[document.getElementById('orcamento-cliente').selectedIndex].text;
+            const servico = document.getElementById('orcamento-servico').options[document.getElementById('orcamento-servico').selectedIndex].text;
+            const valor = parseFloat(document.getElementById('orcamento-valor').value).toFixed(2);
+            const validade = document.getElementById('orcamento-validade').value;
+            
+            // Preencher dados para impressão
+            document.getElementById('orcamento-cliente-print').textContent = cliente;
+            document.getElementById('orcamento-data-print').textContent = new Date().toLocaleDateString();
+            document.getElementById('orcamento-validade-print').textContent = validade + ' dias';
+            document.getElementById('orcamento-descricao-print').textContent = servico;
+            document.getElementById('orcamento-valor-print').textContent = 'R$ ' + valor;
+            
+            // Mostrar área de impressão
+            document.getElementById('orcamento-print').classList.remove('hidden');
+            
+            // Imprimir
+            setTimeout(() => {
+                window.print();
+                document.getElementById('orcamento-print').classList.add('hidden');
+            }, 500);
+        }
+
+        async function visualizarOrcamento(id) {
+            try {
+                // Buscar dados atualizados do orçamento no Supabase
+                const { data, error } = await supabase
+                    .from('orcamentos')
+                    .select('*, clientes(*), servicos(*)')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (!data) {
+                    alert('Orçamento não encontrado!');
+                    return;
+                }
+                
+                // Mostrar o modal de visualização
+                document.getElementById('orcamento-print').classList.remove('hidden');
+                
+                // Preencher dados para visualização/impressão
+                document.getElementById('orcamento-numero-print').textContent = 'ORC' + new Date(data.created_at).getTime().toString().slice(-6);
+                document.getElementById('orcamento-cliente-print').textContent = data.clientes?.nome || 'Cliente não encontrado';
+                document.getElementById('orcamento-data-print').textContent = new Date(data.created_at).toLocaleDateString();
+                document.getElementById('orcamento-validade-print').textContent = data.validade + ' dias';
+                document.getElementById('orcamento-descricao-print').textContent = data.servicos?.descricao || 'Serviço não encontrado';
+                document.getElementById('orcamento-valor-print').textContent = 'R$ ' + parseFloat(data.valor).toFixed(2);
+                
+                // Mostrar o modal
+                showModal('orcamento-visualizar');
+            } catch (error) {
+                console.error('Erro ao visualizar orçamento:', error);
+                alert('Erro ao visualizar orçamento');
+            }
+        }
+
+        function gerarRecibo() {
+            document.getElementById('recibo-modal').classList.remove('hidden');
+            document.getElementById('recibo-print').classList.add('hidden');
+            document.getElementById('recibo-form').reset();
+            
+            carregarClientesNoSelect('recibo-cliente');
+            carregarServicosNoSelect('recibo-servico');
+            
+            // Gerar número de recibo
+            document.getElementById('recibo-numero-print').textContent = 'REC' + new Date().getTime().toString().slice(-6);
+            document.getElementById('recibo-data-print').textContent = new Date().toLocaleDateString();
+        }
+
+        async function salvarRecibo() {
+            const cliente_id = document.getElementById('recibo-cliente').value;
+            const servico_id = document.getElementById('recibo-servico').value;
+            const valor = document.getElementById('recibo-valor').value;
+            const forma_pagamento = document.getElementById('recibo-forma-pagamento').value;
+            
+            if (!cliente_id || !servico_id || !valor) {
+                alert('Preencha todos os campos obrigatórios');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('recibos')
+                    .insert([{ cliente_id, servico_id, valor, forma_pagamento }]);
+                
+                if (error) throw error;
+                
+                alert('Recibo salvo com sucesso!');
+                hideModal('recibo');
+                carregarRecibos();
+            } catch (error) {
+                console.error('Erro ao salvar recibo:', error);
+                alert('Erro ao salvar recibo');
+            }
+        }
+
+        function imprimirRecibo() {
+            const cliente = document.getElementById('recibo-cliente').options[document.getElementById('recibo-cliente').selectedIndex].text;
+            const servico = document.getElementById('recibo-servico').options[document.getElementById('recibo-servico').selectedIndex].text;
+            const valor = parseFloat(document.getElementById('recibo-valor').value).toFixed(2);
+            const forma_pagamento = document.getElementById('recibo-forma-pagamento').value;
+            
+            // Converter valor para extenso (simplificado)
+            const valorExtenso = valorParaExtenso(valor);
+            
+            // Preencher dados para impressão
+            document.getElementById('recibo-cliente-print').textContent = cliente;
+            document.getElementById('recibo-descricao-print').textContent = servico;
+            document.getElementById('recibo-valor-extenso-print').textContent = valorExtenso;
+            document.getElementById('recibo-forma-pagamento-print').textContent = forma_pagamento;
+            
+            // Mostrar área de impressão
+            document.getElementById('recibo-print').classList.remove('hidden');
+            
+            // Imprimir
+            setTimeout(() => {
+                window.print();
+                document.getElementById('recibo-print').classList.add('hidden');
+            }, 500);
+        }
+
+        function visualizarRecibo(id) {
+            const recibo = recibos.find(r => r.id === id);
+            if (!recibo) return;
+            
+            document.getElementById('recibo-modal').classList.remove('hidden');
+            document.getElementById('recibo-print').classList.add('hidden');
+            
+            // Preencher campos
+            document.getElementById('recibo-cliente').value = recibo.cliente_id;
+            document.getElementById('recibo-servico').value = recibo.servico_id;
+            document.getElementById('recibo-valor').value = recibo.valor;
+            document.getElementById('recibo-forma-pagamento').value = recibo.forma_pagamento;
+            
+            // Preencher dados para impressão
+            document.getElementById('recibo-numero-print').textContent = 'REC' + new Date(recibo.created_at).getTime().toString().slice(-6);
+            document.getElementById('recibo-cliente-print').textContent = recibo.clientes?.nome || 'Cliente não encontrado';
+            document.getElementById('recibo-descricao-print').textContent = recibo.servicos?.descricao || 'Serviço não encontrado';
+            document.getElementById('recibo-valor-extenso-print').textContent = valorParaExtenso(recibo.valor);
+            document.getElementById('recibo-forma-pagamento-print').textContent = recibo.forma_pagamento;
+            document.getElementById('recibo-data-print').textContent = new Date(recibo.created_at).toLocaleDateString();
+        }
+
+        // Funções auxiliares
+        async function carregarClientesNoSelect(selectId) {
+            try {
+                const { data, error } = await supabase
+                    .from('clientes')
+                    .select('id, nome')
+                    .order('nome', { ascending: true });
+                
+                if (error) throw error;
+                
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Selecione um cliente</option>';
+                
+                data.forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente.id;
+                    option.textContent = cliente.nome;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+            }
+        }
+
+        async function carregarServicosNoSelect(selectId) {
+            try {
+                const { data, error } = await supabase
+                    .from('servicos')
+                    .select('id, descricao')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const select = document.getElementById(selectId);
+                select.innerHTML = '<option value="">Selecione um serviço</option>';
+                
+                data.forEach(servico => {
+                    const option = document.createElement('option');
+                    option.value = servico.id;
+                    option.textContent = servico.descricao;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar serviços:', error);
+            }
+        }
+
+        function valorParaExtenso(valor) {
+            // Implementação simplificada - em uma aplicação real, use uma biblioteca mais completa
+            const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+            const dezenas = ['', 'dez', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+            const centenas = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+            
+            valor = parseFloat(valor).toFixed(2);
+            const partes = valor.split('.');
+            const inteiro = parseInt(partes[0]);
+            const decimal = parseInt(partes[1]);
+            
+            if (inteiro === 0) {
+                return 'zero reais';
+            }
+            
+            let extenso = '';
+            
+            if (inteiro >= 100) {
+                const centena = Math.floor(inteiro / 100);
+                extenso += centenas[centena];
+                
+                const resto = inteiro % 100;
+                if (resto > 0) {
+                    extenso += ' e ';
+                } else {
+                    extenso += ' ';
+                }
+                
+                if (resto >= 10 && resto <= 19) {
+                    extenso += ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'][resto - 10];
+                } else {
+                    const dezena = Math.floor(resto / 10);
+                    if (dezena > 0) {
+                        extenso += dezenas[dezena];
+                        
+                        const unidade = resto % 10;
+                        if (unidade > 0) {
+                            extenso += ' e ' + unidades[unidade];
+                        }
+                    } else {
+                        const unidade = resto % 10;
+                        if (unidade > 0) {
+                            extenso += unidades[unidade];
+                        }
+                    }
+                }
+            } else {
+                if (inteiro >= 10 && inteiro <= 19) {
+                    extenso += ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'][inteiro - 10];
+                } else if (inteiro > 0) {
+                    extenso += dezenas[Math.floor(inteiro / 10)];
+                    if (inteiro % 10 > 0) {
+                        extenso += ' e ' + unidades[inteiro % 10];
+                    }
+                }
+            }
+            
+            return extenso;
+        }
+    </script>
+</html>
