@@ -10,13 +10,209 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/styles.css">
-   
+    <style>
+      /* Sidebar off-canvas para mobile */
+      @media (max-width: 768px) {
+        .sidebar {
+          position: fixed;
+          left: -100%;
+          top: 0;
+          width: 80vw;
+          max-width: 320px;
+          z-index: 50;
+          transition: left 0.3s;
+        }
+        .sidebar.open {
+          left: 0;
+        }
+        .main-content {
+          margin-left: 0 !important;
+        }
+        .mobile-overlay {
+          display: block;
+        }
+      }
+      @media (min-width: 769px) {
+        .mobile-overlay {
+          display: none !important;
+        }
+      }
+      /* Footer mobile fixo */
+      .mobile-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        z-index: 40;
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-around;
+        padding: 0.5rem 0;
+      }
+      .mobile-footer-item {
+        flex: 1;
+        text-align: center;
+        color: #6366f1;
+        font-size: 0.9rem;
+        padding: 0.3rem 0;
+      }
+      .mobile-footer-item.active {
+        color: #fff;
+        background: #6366f1;
+        border-radius: 0.5rem;
+      }
+      /* Tabelas responsivas */
+      .data-table {
+        min-width: 600px;
+      }
+      @media (max-width: 768px) {
+        .data-table {
+          font-size: 0.95rem;
+        }
+        .glass-card, .stat-card {
+          padding: 1rem !important;
+        }
+      }
+      /* Modais centralizados e roláveis no mobile */
+      @media (max-width: 768px) {
+        .modal {
+          align-items: flex-start !important;
+          padding-top: 2rem;
+        }
+        .modal > div {
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+      }
+      /* Ajustes gerais de responsividade */
+      @media (max-width: 768px) {
+        .glass-card {
+            padding: 1rem !important;
+            margin: 0.5rem 0;
+        }
+        .stat-card {
+            padding: 1rem !important;
+        }
+        .grid-cols-4 {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+        .grid-cols-2 {
+            grid-template-columns: 1fr !important;
+        }
+        .text-3xl {
+            font-size: 1.5rem !important;
+        }
+        .text-2xl {
+            font-size: 1.25rem !important;
+        }
+        .text-xl {
+            font-size: 1.125rem !important;
+        }
+        .p-6 {
+            padding: 1rem !important;
+        }
+        .space-y-6 > * + * {
+            margin-top: 1rem !important;
+        }
+        .gap-6 {
+            gap: 1rem !important;
+        }
+    }
+
+    /* Ajustes específicos para tabelas */
+    .data-table {
+        min-width: 600px;
+    }
+    @media (max-width: 768px) {
+        .data-table {
+            font-size: 0.875rem !important;
+        }
+        .data-table th,
+        .data-table td {
+            padding: 0.5rem !important;
+        }
+        .overflow-x-auto {
+            margin: 0 -1rem;
+            padding: 0 1rem;
+            width: calc(100% + 2rem);
+        }
+    }
+
+    /* Ajustes para modais */
+    @media (max-width: 768px) {
+        .modal > div {
+            width: 95% !important;
+            max-width: none !important;
+            margin: 1rem !important;
+            max-height: 90vh !important;
+        }
+        .modal form {
+            padding: 1rem !important;
+        }
+        .modal .grid {
+            gap: 1rem !important;
+        }
+    }
+
+    /* Ajustes para cards do dashboard */
+    @media (max-width: 768px) {
+        .stat-card .flex {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .stat-card .h-12 {
+            height: 2.5rem !important;
+            width: 2.5rem !important;
+        }
+        .stat-card .text-xl {
+            font-size: 1rem !important;
+        }
+    }
+
+    /* Ajustes para o Kanban */
+    @media (max-width: 768px) {
+        .kanban-column {
+            min-width: 280px;
+        }
+        #kanban-section .grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+        }
+        .kanban-card {
+            padding: 0.75rem !important;
+        }
+    }
+
+    /* Ajustes para formulários */
+    @media (max-width: 768px) {
+        input, select, textarea {
+            font-size: 16px !important; /* Evita zoom em iOS */
+        }
+        .form-grid {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    /* Ajustes para botões e ações */
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .action-buttons button {
+            width: 100%;
+        }
+    }
+    </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Overlay para sidebar mobile -->
+    <div id="mobile-overlay" class="mobile-overlay fixed inset-0 bg-black bg-opacity-40 z-40 hidden" onclick="toggleSidebar(false)"></div>
     <!-- App Container -->
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar (Desktop) -->
-        <div class="sidebar fixed h-full text-white w-64 z-20 no-print flex-shrink-0" id="sidebar">
+        <!-- Sidebar (Desktop/Mobile) -->
+        <div class="sidebar fixed h-full text-white w-64 z-50 no-print flex-shrink-0 bg-indigo-900" id="sidebar">
             <div class="p-6 flex items-center space-x-3 border-b border-white border-opacity-10">
                 <div class="bg-white p-2 rounded-lg">
                     <i class="fas fa-tools text-indigo-600 text-xl"></i>
@@ -72,11 +268,11 @@
         </div>
 
         <!-- Main Content -->
-        <div class="main-content flex-1 overflow-auto ml-64" id="main-content">
+        <div class="main-content flex-1 overflow-auto md:ml-64" id="main-content">
             <!-- Top Navigation -->
-            <div class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+            <div class="bg-white border-b border-gray-200 px-4 md:px-6 py-4 flex justify-between items-center sticky top-0 z-10">
                 <div class="flex items-center space-x-4">
-                    <button class="md:hidden text-gray-500" onclick="toggleMobileMenu()">
+                    <button class="md:hidden text-gray-500" onclick="toggleSidebar()">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <h1 class="text-xl font-semibold text-gray-800" id="page-title">Dashboard</h1>
@@ -689,7 +885,7 @@
     </div>
 
     <!-- Mobile Footer (Celular) -->
-    <div class="mobile-footer no-print" id="mobile-footer">
+    <div class="mobile-footer no-print md:hidden" id="mobile-footer">
         <div class="mobile-footer-item active" onclick="showSection('dashboard')">
             <i class="fas fa-chart-line"></i>
             <span>Dashboard</span>
@@ -1250,5 +1446,32 @@
     function atualizarSelectClientes() {
       // Função stub para evitar erro de função não definida
     }
+    // Sidebar mobile toggle
+    function toggleSidebar(force) {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobile-overlay');
+      if (window.innerWidth > 768) return;
+      if (force === false) {
+        sidebar.classList.remove('open');
+        overlay.classList.add('hidden');
+      } else if (force === true) {
+        sidebar.classList.add('open');
+        overlay.classList.remove('hidden');
+      } else {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('hidden');
+      }
+    }
+    // Fecha sidebar ao redimensionar para desktop
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('mobile-overlay').classList.add('hidden');
+      }
+    });
+    // Scroll horizontal automático para tabelas
+    document.querySelectorAll('.glass-card .overflow-x-auto').forEach(el => {
+      el.style.overflowX = 'auto';
+    });
     </script>
   </body></html>
