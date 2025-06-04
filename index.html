@@ -14,7 +14,7 @@
         }
         .login-container {
             min-height: 100vh;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #6e5b10 0%, #080500 100%);
         }
         .login-card {
             background: rgba(255, 255, 255, 0.95);
@@ -23,7 +23,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         .btn-primary {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #70660c 0%, #211c04 100%);
             transition: all 0.3s ease;
         }
         .btn-primary:hover {
@@ -34,7 +34,7 @@
             transition: all 0.3s ease;
         }
         .input-field:focus {
-            border-color: #4f46e5;
+            border-color: #393106;
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
         @media (max-width: 640px) {
@@ -113,6 +113,22 @@
     <!-- Scripts -->
     <script src="assets/js/config.js"></script>
     <script src="assets/js/api.js"></script>
-    <script src="assets/js/app.js"></script>
+    <!-- Script de login Supabase -->
+    <script>
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        document.getElementById('loading-overlay').classList.remove('hidden');
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        document.getElementById('loading-overlay').classList.add('hidden');
+        if (error) {
+            document.getElementById('login-error').textContent = error.message;
+            document.getElementById('login-error').classList.remove('hidden');
+        } else {
+            window.location.href = 'painel.html';
+        }
+    });
+    </script>
 </body>
 </html>
