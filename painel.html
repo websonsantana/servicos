@@ -863,11 +863,11 @@
                         </div>
                         <div>
                             <label for="cidade" class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
-                            <input type="text" id="cidade" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <input type="text" id="cidade" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" readonly>
                         </div>
                         <div>
                             <label for="estado" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                            <select id="estado" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <select id="estado" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" disabled>
                                 <option value="">Selecione</option>
                                 <!-- Estados serão carregados via JavaScript -->
                             </select>
@@ -875,6 +875,10 @@
                         <div class="md:col-span-2">
                             <label for="observacoes" class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
                             <textarea id="observacoes" rows="2" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                        </div>
+                        <div>
+                            <label for="cep" class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+                            <input type="text" id="cep" name="cep" maxlength="9" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="00000-000">
                         </div>
                     </div>
                 </div>
@@ -1389,5 +1393,45 @@
     document.querySelectorAll('.glass-card .overflow-x-auto').forEach(el => {
       el.style.overflowX = 'auto';
     });
+    // Função para buscar cidade/estado pelo CEP
+    function buscarCepCliente() {
+        const cep = document.getElementById('cep').value.replace(/\D/g, '');
+        if (cep.length !== 8) return;
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.erro) {
+                    document.getElementById('cidade').value = '';
+                    document.getElementById('estado').value = '';
+                    document.getElementById('cidade').readOnly = false;
+                    document.getElementById('estado').disabled = false;
+                    alert('CEP não encontrado. Preencha manualmente.');
+                } else {
+                    document.getElementById('cidade').value = data.localidade;
+                    document.getElementById('estado').value = data.uf;
+                    document.getElementById('cidade').readOnly = true;
+                    document.getElementById('estado').disabled = true;
+                }
+            })
+            .catch(() => {
+                document.getElementById('cidade').value = '';
+                document.getElementById('estado').value = '';
+                document.getElementById('cidade').readOnly = false;
+                document.getElementById('estado').disabled = false;
+                alert('Erro ao buscar CEP. Preencha manualmente.');
+            });
+    }
+    // Detecta saída do campo CEP
+    if (document.getElementById('cep')) {
+        document.getElementById('cep').addEventListener('blur', buscarCepCliente);
+    }
+    // Se digitar na cidade, habilita estado
+    if (document.getElementById('cidade')) {
+        document.getElementById('cidade').addEventListener('input', function() {
+            if (!this.readOnly) {
+                document.getElementById('estado').disabled = false;
+            }
+        });
+    }
     </script>
   </body></html>
