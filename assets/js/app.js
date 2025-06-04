@@ -19,6 +19,9 @@ const App = (() => {
         servicesStatusChart: null
     };
 
+    // Expor o estado globalmente
+    window.state = state;
+
     // Inicialização do aplicativo
     async function init() {
         try {
@@ -228,6 +231,7 @@ const App = (() => {
             state.recibos = recibos || [];
             if (typeof renderizarRecibos === 'function') renderizarRecibos();
 
+            if (typeof updateDashboard === 'function') updateDashboard();
         } catch (error) {
             console.error('Erro ao carregar dados iniciais:', error);
             mostrarMensagem('Erro', 'Não foi possível carregar os dados iniciais', 'error');
@@ -1287,3 +1291,5 @@ async function handleReciboSubmit(e) {
         hideLoading();
     }
 }
+
+window.updateDashboard = updateDashboard;

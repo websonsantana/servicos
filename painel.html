@@ -208,9 +208,9 @@
         </div>
 
         <!-- Main Content -->
-        <div class="main-content flex-1 overflow-auto md:ml-64" id="main-content">
-            <!-- Top Navigation -->
-            <div class="bg-white border-b border-gray-200 px-4 md:px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+        <div class="main-content flex-1 ml-64 transition-all duration-300">
+            <!-- Header -->
+            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 fixed top-0 right-0 left-64 z-40">
                 <div class="flex items-center space-x-4">
                     <button class="md:hidden text-gray-500" onclick="toggleSidebar()">
                         <i class="fas fa-bars text-xl"></i>
@@ -257,570 +257,494 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            <!-- Seções do Sistema -->
-            <div id="dashboard-section" class="section p-6">
-                <!-- Conteúdo do Dashboard... -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <div class="stat-card bg-white rounded-xl shadow-sm p-6 animate-fadeIn" style="animation-delay: 0.1s">
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Serviços Pendentes</p>
-                                <h2 class="text-3xl font-bold mt-2" id="pendentes-count">0</h2>
-                            </div>
-                            <div class="h-12 w-12 rounded-lg bg-amber-100 flex items-center justify-center">
-                                <i class="fas fa-clock text-amber-500 text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <span class="text-sm text-gray-500"><span class="text-green-500 font-medium">+2.5%</span> vs último mês</span>
-                        </div>
+            <!-- Content Area -->
+            <main class="pt-16 min-h-screen bg-gray-50">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="section">
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="glass-card p-6 flex items-center justify-between">
+                      <div>
+                        <div class="text-sm text-gray-500">Clientes</div>
+                        <div class="text-2xl font-bold" id="total-clientes">0</div>
+                      </div>
+                      <i class="fas fa-users text-indigo-500 text-3xl"></i>
                     </div>
-                    
-                    <div class="stat-card bg-white rounded-xl shadow-sm p-6 animate-fadeIn" style="animation-delay: 0.2s">
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Em Andamento</p>
-                                <h2 class="text-3xl font-bold mt-2" id="andamento-count">0</h2>
-                            </div>
-                            <div class="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                                <i class="fas fa-tools text-blue-500 text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <span class="text-sm text-gray-500"><span class="text-green-500 font-medium">+5.1%</span> vs último mês</span>
-                        </div>
+                    <div class="glass-card p-6 flex items-center justify-between">
+                      <div>
+                        <div class="text-sm text-gray-500">Serviços</div>
+                        <div class="text-2xl font-bold" id="total-servicos">0</div>
+                      </div>
+                      <i class="fas fa-concierge-bell text-indigo-500 text-3xl"></i>
                     </div>
-                    
-                    <div class="stat-card bg-white rounded-xl shadow-sm p-6 animate-fadeIn" style="animation-delay: 0.3s">
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Concluídos</p>
-                                <h2 class="text-3xl font-bold mt-2" id="concluidos-count">0</h2>
-                            </div>
-                            <div class="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
-                                <i class="fas fa-check-circle text-green-500 text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <span class="text-sm text-gray-500"><span class="text-green-500 font-medium">+12.7%</span> vs último mês</span>
-                        </div>
+                    <div class="glass-card p-6 flex items-center justify-between">
+                      <div>
+                        <div class="text-sm text-gray-500">Equipe</div>
+                        <div class="text-2xl font-bold" id="total-funcionarios">0</div>
+                      </div>
+                      <i class="fas fa-user-friends text-indigo-500 text-3xl"></i>
                     </div>
-                    
-                    <div class="stat-card bg-white rounded-xl shadow-sm p-6 animate-fadeIn" style="animation-delay: 0.4s">
-                        <div class="flex justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Receita Total</p>
-                                <h2 class="text-3xl font-bold mt-2">R$ <span id="receita-total">0</span></h2>
-                            </div>
-                            <div class="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
-                                <i class="fas fa-dollar-sign text-purple-500 text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <span class="text-sm text-gray-500"><span class="text-green-500 font-medium">+8.3%</span> vs último mês</span>
-                        </div>
+                    <div class="glass-card p-6 flex items-center justify-between">
+                      <div>
+                        <div class="text-sm text-gray-500">Orçamentos</div>
+                        <div class="text-2xl font-bold" id="total-orcamentos">0</div>
+                      </div>
+                      <i class="fas fa-file-invoice-dollar text-indigo-500 text-3xl"></i>
                     </div>
+                    <div class="glass-card p-6 flex items-center justify-between">
+                      <div>
+                        <div class="text-sm text-gray-500">Recibos</div>
+                        <div class="text-2xl font-bold" id="total-recibos">0</div>
+                      </div>
+                      <i class="fas fa-receipt text-indigo-500 text-3xl"></i>
+                    </div>
+                  </div>
+                  <div class="glass-card p-6 mt-6">
+                    <h2 class="text-lg font-semibold mb-4">Gráficos de Serviços</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <canvas id="servicesEvolutionChart"></canvas>
+                      </div>
+                      <div>
+                        <canvas id="servicesStatusChart"></canvas>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                
-                <!-- Gráficos e Atividades Recentes -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                    <div class="lg:col-span-2 glass-card p-6">
-                        <h2 class="text-lg font-semibold mb-4">Evolução de Serviços</h2>
-                        <div class="h-72">
-                            <canvas id="servicesEvolutionChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="glass-card p-6">
-                        <h2 class="text-lg font-semibold mb-4">Status dos Serviços</h2>
-                        <div class="h-72">
-                            <canvas id="servicesStatusChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="glass-card p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-semibold">Atividades Recentes</h2>
-                            <button class="text-sm text-indigo-600 hover:text-indigo-800" onclick="showSection('historico')">Ver tudo</button>
-                        </div>
-                        <div class="divide-y divide-gray-200" id="ultimos-servicos">
-                            <!-- Atividades serão carregadas aqui -->
-                            <div class="py-3">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center space-x-2">
-                                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                            <i class="fas fa-user text-indigo-600"></i>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium">Novo cliente cadastrado</p>
-                                            <p class="text-sm text-gray-500">João Silva - 15/06/2023</p>
-                                        </div>
-                                    </div>
-                                    <span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-800">Cliente</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="glass-card p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-lg font-semibold">Calendário</h2>
-                            <div class="flex space-x-2">
-                                <button class="p-1 rounded hover:bg-gray-100">
-                                    <i class="fas fa-chevron-left text-gray-500"></i>
-                                </button>
-                                <span class="text-sm font-medium">Junho 2023</span>
-                                <button class="p-1 rounded hover:bg-gray-100">
-                                    <i class="fas fa-chevron-right text-gray-500"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-7 gap-1 text-center text-sm text-gray-500 font-medium mb-2">
-                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-                        </div>
-                        <div class="grid grid-cols-7 gap-1" id="calendar-days">
-                            <!-- Dias do calendário serão gerados via JavaScript -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção de Clientes (mantendo sua versão mas melhorada) -->
-            <div id="clientes-section" class="section hidden p-6">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Gestão de Clientes</h1>
-                    <div class="flex space-x-3">
-                        <div class="relative flex-1 md:w-64">
-                            <input type="text" id="search-cliente" placeholder="Buscar cliente..."
-                                   class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <div class="absolute left-3 top-2.5 text-gray-400">
-                                <i class="fas fa-search"></i>
-                            </div>
-                        </div>
-                        <button onclick="showModal('cliente')" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
-                            <i class="fas fa-plus"></i>
-                            <span>Novo Cliente</span>
-                        </button>
-                        <button onclick="exportClientes()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100 flex items-center space-x-2">
-                            <i class="fas fa-file-export"></i>
-                            <span>Exportar</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="glass-card p-6">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full data-table">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviços</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200" id="clientes-tbody">
-                                <!-- Clientes serão carregados via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="mt-6 flex items-center justify-between">
-                        <div class="text-sm text-gray-500">
-                            Mostrando <span class="font-medium" id="clientes-start">1</span> a <span class="font-medium" id="clientes-end">10</span> de <span class="font-medium" id="clientes-total">0</span> clientes
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="previousClientPage()">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <div id="clientes-pagination" class="flex space-x-1">
-                                <!-- Paginação será gerada via JavaScript -->
-                            </div>
-                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="nextClientPage()">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção de Serviços (melhorada com atribuição de funcionários) -->
-            <div id="servicos-section" class="section hidden p-6">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Gestão de Serviços</h1>
-                    <div class="flex space-x-3">
-                        <div class="relative md:w-48">
-                            <select id="filter-status" class="appearance-none w-full pl-3 pr-8 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="all">Todos</option>
-                                <option value="pendente">Pendentes</option>
-                                <option value="andamento">Em Andamento</option>
-                                <option value="aguardando">Aguardando Peça</option>
-                                <option value="concluido">Concluídos</option>
-                            </select>
-                            <div class="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <div class="relative flex-1 md:w-64">
-                            <input type="text" id="search-servico" placeholder="Buscar serviço..."
-                                   class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <div class="absolute left-3 top-2.5 text-gray-400">
-                                <i class="fas fa-search"></i>
-                            </div>
-                        </div>
-                        <button onclick="showModal('servico')" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
-                            <i class="fas fa-plus"></i>
-                            <span>Novo Serviço</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="glass-card p-6">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full data-table">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Técnico</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200" id="servicos-table">
-                                <!-- Serviços serão carregados via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="mt-6 flex items-center justify-between">
-                        <div class="text-sm text-gray-500">
-                            Mostrando <span class="font-medium" id="servicos-start">1</span> a <span class="font-medium" id="servicos-end">10</span> de <span class="font-medium" id="servicos-total">0</span> serviços
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="previousServicePage()">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <div id="servicos-pagination" class="flex space-x-2">
-                                <!-- Paginação será gerada via JavaScript -->
-                            </div>
-                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="nextServicePage()">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção Kanban (nova funcionalidade) -->
-            <div id="kanban-section" class="section hidden p-6">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Quadro Kanban</h1>
-                    <div class="flex space-x-3">
-                        <div class="relative flex-1 md:w-64">
-                            <select id="filter-kanban" class="w-full pl-3 pr-8 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="all">Todos os técnicos</option>
-                                <!-- Técnicos serão carregados aqui -->
-                            </select>
-                        </div>
-                        <button onclick="refreshKanban()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100 flex items-center space-x-2">
-                            <i class="fas fa-sync-alt"></i>
-                            <span>Atualizar</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="space-y-6">
-                    <!-- Filtros para os cartões Kanban -->
-                    <div class="glass-card p-4">
-                        <div class="grid grid-cols-4 gap-4">
-                            <div class="col-span-4 md:col-span-1">
-                                <label for="kanban-search" class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
-                                <div class="relative">
-                                    <input type="text" id="kanban-search" placeholder="Buscar serviço..."
-                                           class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                    <div class="absolute left-3 top-2.5 text-gray-400">
-                                        <i class="fas fa-search"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-2 md:col-span-1">
-                                <label for="kanban-priority" class="block text-sm font-medium text-gray-700 mb-1">Prioridade</label>
-                                <select id="kanban-priority" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="all">Todas</option>
-                                    <option value="alta">Alta</option>
-                                    <option value="media">Média</option>
-                                    <option value="baixa">Baixa</option>
-                                </select>
-                            </div>
-                            <div class="col-span-2 md:col-span-1">
-                                <label for="kanban-date" class="block text-sm font-medium text-gray-700 mb-1">Período</label>
-                                <select id="kanban-date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="today">Hoje</option>
-                                    <option value="this_week">Esta Semana</option>
-                                    <option value="this_month">Este Mês</option>
-                                    <option value="all">Todos</option>
-                                </select>
-                            </div>
-                            <div class="col-span-4 md:col-span-1">
-                                <label for="kanban-client" class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
-                                <select id="kanban-client" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="all">Todos</option>
-                                    <!-- Clientes serão carregados aqui -->
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Colunas do Kanban -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <!-- Coluna Pendente -->
-                        <div class="kanban-column p-4">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="font-medium text-gray-700">Pendente</h2>
-                                <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-pendente">0</span>
-                            </div>
-                            <div class="space-y-3" id="kanban-pendente" ondrop="drop(event)" ondragover="allowDrop(event)">
-                                <!-- Itens serão carregados via JavaScript -->
-                            </div>
-                        </div>
-                        
-                        <!-- Coluna Em Andamento -->
-                        <div class="kanban-column p-4">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="font-medium text-gray-700">Em Andamento</h2>
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-andamento">0</span>
-                            </div>
-                            <div class="space-y-3" id="kanban-andamento" ondrop="drop(event)" ondragover="allowDrop(event)">
-                                <!-- Itens serão carregados via JavaScript -->
-                            </div>
-                        </div>
-                        
-                        <!-- Coluna Aguardando -->
-                        <div class="kanban-column p-4">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="font-medium text-gray-700">Aguardando</h2>
-                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-aguardando">0</span>
-                            </div>
-                            <div class="space-y-3" id="kanban-aguardando" ondrop="drop(event)" ondragover="allowDrop(event)">
-                                <!-- Itens serão carregados via JavaScript -->
-                            </div>
-                        </div>
-                        
-                        <!-- Coluna Concluído -->
-                        <div class="kanban-column p-4">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="font-medium text-gray-700">Concluído</h2>
-                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-concluido">0</span>
-                            </div>
-                            <div class="space-y-3" id="kanban-concluido" ondrop="drop(event)" ondragover="allowDrop(event)">
-                                <!-- Itens serão carregados via JavaScript -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção de Equipe (nova funcionalidade) -->
-            <div id="equipe-section" class="section hidden p-6">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Gestão da Equipe</h1>
-                    <div class="flex space-x-3">
-                        <div class="relative flex-1 md:w-64">
-                            <input type="text" id="search-equipe" placeholder="Buscar membro..."
-                                   class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <div class="absolute left-3 top-2.5 text-gray-400">
-                                <i class="fas fa-search"></i>
-                            </div>
-                        </div>
-                        <button onclick="showModal('funcionario')" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
-                            <i class="fas fa-plus"></i>
-                            <span>Novo Funcionário</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="glass-card p-6">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full data-table">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funcionário</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviços</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200" id="equipe-tbody">
-                                <!-- Funcionários serão carregados via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="mt-6 flex items-center justify-between">
-                        <div class="text-sm text-gray-500">
-                            Mostrando <span class="font-medium" id="equipe-start">1</span> a <span class="font-medium" id="equipe-end">10</span> de <span class="font-medium" id="equipe-total">0</span> membros
-                        </div>
-                        <div class="flex space-x-2">
-                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="previousTeamPage()">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <div id="equipe-pagination" class="flex space-x-2">
-                                <!-- Paginação será gerada via JavaScript -->
-                            </div>
-                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="nextTeamPage()">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção de Orçamentos (melhorada) -->
-            <div id="orcamentos-section" class="section hidden p-6">
-                <div class="glass-card p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">Orçamentos</h2>
-                        <button onclick="showModal('orcamento')" class="btn-primary">
-                            <i class="fas fa-plus mr-2"></i>Novo Orçamento
-                        </button>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full data-table">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validade</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200" id="orcamentos-tbody">
-                                <!-- Orçamentos serão carregados via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção de Recibos (melhorada) -->
-            <div id="recibos-section" class="section hidden p-6">
-                <div class="glass-card p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">Recibos</h2>
-                        <button onclick="showModal('recibo')" class="btn-primary">
-                            <i class="fas fa-plus mr-2"></i>Novo Recibo
-                        </button>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full data-table">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Forma de Pagamento</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200" id="recibos-tbody">
-                                <!-- Recibos serão carregados via JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção de Relatórios (nova funcionalidade) -->
-            <div id="relatorios-section" class="section hidden p-6">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
-                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Relatórios e Análises</h1>
-                    <div class="flex space-x-3">
-                        <div class="relative flex-1 md:w-64">
-                            <select id="filter-relatorio" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                <option value="mensal">Mensal</option>
-                                <option value="trimestral">Trimestral</option>
-                                <option value="semestral">Semestral</option>
-                                <option value="anual">Anual</option>
-                                <option value="personalizado">Personalizado</option>
-                            </select>
-                        </div>
-                        <button onclick="gerarRelatorio()" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
-                            <i class="fas fa-file-export"></i>
-                            <span>Exportar</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <div class="glass-card p-6">
-                        <h2 class="text-lg font-semibold mb-4">Desempenho por Técnico</h2>
-                        <div class="h-80">
-                            <canvas id="techPerformanceChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="glass-card p-6">
-                        <h2 class="text-lg font-semibold mb-4">Receita por Serviço</h2>
-                        <div class="h-80">
-                            <canvas id="serviceRevenueChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="glass-card p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold">Detalhes dos Relatórios</h2>
+                <!-- Clientes Section -->
+                <div id="clientes-section" class="section">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                        <h1 class="text-2xl font-bold mb-4 md:mb-0">Gestão de Clientes</h1>
                         <div class="flex space-x-3">
-                            <div class="relative">
-                                <input type="date" id="start-date" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <div class="relative flex-1 md:w-64">
+                                <input type="text" id="search-cliente" placeholder="Buscar cliente..."
+                                       class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <div class="absolute left-3 top-2.5 text-gray-400">
+                                    <i class="fas fa-search"></i>
+                                </div>
                             </div>
-                            <span>até</span>
-                            <div class="relative">
-                                <input type="date" id="end-date" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-                            <button onclick="filterReports()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100">
-                                <i class="fas fa-filter"></i>
+                            <button onclick="showModal('cliente')" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                <i class="fas fa-plus"></i>
+                                <span>Novo Cliente</span>
+                            </button>
+                            <button onclick="exportClientes()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100 flex items-center space-x-2">
+                                <i class="fas fa-file-export"></i>
+                                <span>Exportar</span>
                             </button>
                         </div>
                     </div>
                     
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full data-table">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Período</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviços</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receita</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lucro</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200" id="relatorios-table">
-                                <!-- Relatórios serão carregados via JavaScript -->
-                            </tbody>
-                        </table>
+                    <div class="glass-card p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviços</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200" id="clientes-tbody">
+                                    <!-- Clientes serão carregados via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-6 flex items-center justify-between">
+                            <div class="text-sm text-gray-500">
+                                Mostrando <span class="font-medium" id="clientes-start">1</span> a <span class="font-medium" id="clientes-end">10</span> de <span class="font-medium" id="clientes-total">0</span> clientes
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="previousClientPage()">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div id="clientes-pagination" class="flex space-x-1">
+                                    <!-- Paginação será gerada via JavaScript -->
+                                </div>
+                                <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="nextClientPage()">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Seção de Histórico (melhorada) -->
-            <div id="historico-section" class="section hidden p-6">
-                <!-- Conteúdo similar ao original mas com melhorias -->
-            </div>
+                <!-- Serviços Section -->
+                <div id="servicos-section" class="section hidden">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                        <h1 class="text-2xl font-bold mb-4 md:mb-0">Gestão de Serviços</h1>
+                        <div class="flex space-x-3">
+                            <div class="relative md:w-48">
+                                <select id="filter-status" class="appearance-none w-full pl-3 pr-8 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">Todos</option>
+                                    <option value="pendente">Pendentes</option>
+                                    <option value="andamento">Em Andamento</option>
+                                    <option value="aguardando">Aguardando Peça</option>
+                                    <option value="concluido">Concluídos</option>
+                                </select>
+                                <div class="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                            <div class="relative flex-1 md:w-64">
+                                <input type="text" id="search-servico" placeholder="Buscar serviço..."
+                                       class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <div class="absolute left-3 top-2.5 text-gray-400">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                            </div>
+                            <button onclick="showModal('servico')" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                <i class="fas fa-plus"></i>
+                                <span>Novo Serviço</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Técnico</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200" id="servicos-table">
+                                    <!-- Serviços serão carregados via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-6 flex items-center justify-between">
+                            <div class="text-sm text-gray-500">
+                                Mostrando <span class="font-medium" id="servicos-start">1</span> a <span class="font-medium" id="servicos-end">10</span> de <span class="font-medium" id="servicos-total">0</span> serviços
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="previousServicePage()">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div id="servicos-pagination" class="flex space-x-2">
+                                    <!-- Paginação será gerada via JavaScript -->
+                                </div>
+                                <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="nextServicePage()">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipe Section -->
+                <div id="equipe-section" class="section hidden">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                        <h1 class="text-2xl font-bold mb-4 md:mb-0">Gestão da Equipe</h1>
+                        <div class="flex space-x-3">
+                            <div class="relative flex-1 md:w-64">
+                                <input type="text" id="search-equipe" placeholder="Buscar membro..."
+                                       class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <div class="absolute left-3 top-2.5 text-gray-400">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                            </div>
+                            <button onclick="showModal('funcionario')" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                <i class="fas fa-plus"></i>
+                                <span>Novo Funcionário</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funcionário</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviços</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200" id="equipe-tbody">
+                                    <!-- Funcionários serão carregados via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-6 flex items-center justify-between">
+                            <div class="text-sm text-gray-500">
+                                Mostrando <span class="font-medium" id="equipe-start">1</span> a <span class="font-medium" id="equipe-end">10</span> de <span class="font-medium" id="equipe-total">0</span> membros
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="previousTeamPage()">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div id="equipe-pagination" class="flex space-x-2">
+                                    <!-- Paginação será gerada via JavaScript -->
+                                </div>
+                                <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="nextTeamPage()">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orçamentos Section -->
+                <div id="orcamentos-section" class="section hidden">
+                    <div class="glass-card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold">Orçamentos</h2>
+                            <button onclick="showModal('orcamento')" class="btn-primary">
+                                <i class="fas fa-plus mr-2"></i>Novo Orçamento
+                            </button>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validade</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200" id="orcamentos-tbody">
+                                    <!-- Orçamentos serão carregados via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recibos Section -->
+                <div id="recibos-section" class="section hidden">
+                    <div class="glass-card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold">Recibos</h2>
+                            <button onclick="showModal('recibo')" class="btn-primary">
+                                <i class="fas fa-plus mr-2"></i>Novo Recibo
+                            </button>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Forma de Pagamento</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200" id="recibos-tbody">
+                                    <!-- Recibos serão carregados via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kanban Section -->
+                <div id="kanban-section" class="section hidden">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                        <h1 class="text-2xl font-bold mb-4 md:mb-0">Quadro Kanban</h1>
+                        <div class="flex space-x-3">
+                            <div class="relative flex-1 md:w-64">
+                                <select id="filter-kanban" class="w-full pl-3 pr-8 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">Todos os técnicos</option>
+                                    <!-- Técnicos serão carregados aqui -->
+                                </select>
+                            </div>
+                            <button onclick="refreshKanban()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100 flex items-center space-x-2">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Atualizar</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <!-- Filtros para os cartões Kanban -->
+                        <div class="glass-card p-4">
+                            <div class="grid grid-cols-4 gap-4">
+                                <div class="col-span-4 md:col-span-1">
+                                    <label for="kanban-search" class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                                    <div class="relative">
+                                        <input type="text" id="kanban-search" placeholder="Buscar serviço..."
+                                               class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <div class="absolute left-3 top-2.5 text-gray-400">
+                                            <i class="fas fa-search"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-span-2 md:col-span-1">
+                                    <label for="kanban-priority" class="block text-sm font-medium text-gray-700 mb-1">Prioridade</label>
+                                    <select id="kanban-priority" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="all">Todas</option>
+                                        <option value="alta">Alta</option>
+                                        <option value="media">Média</option>
+                                        <option value="baixa">Baixa</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-2 md:col-span-1">
+                                    <label for="kanban-date" class="block text-sm font-medium text-gray-700 mb-1">Período</label>
+                                    <select id="kanban-date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="today">Hoje</option>
+                                        <option value="this_week">Esta Semana</option>
+                                        <option value="this_month">Este Mês</option>
+                                        <option value="all">Todos</option>
+                                    </select>
+                                </div>
+                                <div class="col-span-4 md:col-span-1">
+                                    <label for="kanban-client" class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
+                                    <select id="kanban-client" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="all">Todos</option>
+                                        <!-- Clientes serão carregados aqui -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Colunas do Kanban -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <!-- Coluna Pendente -->
+                            <div class="kanban-column p-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="font-medium text-gray-700">Pendente</h2>
+                                    <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-pendente">0</span>
+                                </div>
+                                <div class="space-y-3" id="kanban-pendente" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <!-- Itens serão carregados via JavaScript -->
+                                </div>
+                            </div>
+                            
+                            <!-- Coluna Em Andamento -->
+                            <div class="kanban-column p-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="font-medium text-gray-700">Em Andamento</h2>
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-andamento">0</span>
+                                </div>
+                                <div class="space-y-3" id="kanban-andamento" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <!-- Itens serão carregados via JavaScript -->
+                                </div>
+                            </div>
+                            
+                            <!-- Coluna Aguardando -->
+                            <div class="kanban-column p-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="font-medium text-gray-700">Aguardando</h2>
+                                    <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-aguardando">0</span>
+                                </div>
+                                <div class="space-y-3" id="kanban-aguardando" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <!-- Itens serão carregados via JavaScript -->
+                                </div>
+                            </div>
+                            
+                            <!-- Coluna Concluído -->
+                            <div class="kanban-column p-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="font-medium text-gray-700">Concluído</h2>
+                                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-concluido">0</span>
+                                </div>
+                                <div class="space-y-3" id="kanban-concluido" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                    <!-- Itens serão carregados via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relatórios Section -->
+                <div id="relatorios-section" class="section hidden">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                        <h1 class="text-2xl font-bold mb-4 md:mb-0">Relatórios e Análises</h1>
+                        <div class="flex space-x-3">
+                            <div class="relative flex-1 md:w-64">
+                                <select id="filter-relatorio" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="mensal">Mensal</option>
+                                    <option value="trimestral">Trimestral</option>
+                                    <option value="semestral">Semestral</option>
+                                    <option value="anual">Anual</option>
+                                    <option value="personalizado">Personalizado</option>
+                                </select>
+                            </div>
+                            <button onclick="gerarRelatorio()" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                <i class="fas fa-file-export"></i>
+                                <span>Exportar</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="glass-card p-6">
+                            <h2 class="text-lg font-semibold mb-4">Desempenho por Técnico</h2>
+                            <div class="h-80">
+                                <canvas id="techPerformanceChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card p-6">
+                            <h2 class="text-lg font-semibold mb-4">Receita por Serviço</h2>
+                            <div class="h-80">
+                                <canvas id="serviceRevenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Detalhes dos Relatórios</h2>
+                            <div class="flex space-x-3">
+                                <div class="relative">
+                                    <input type="date" id="start-date" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <span>até</span>
+                                <div class="relative">
+                                    <input type="date" id="end-date" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <button onclick="filterReports()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Período</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviços</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receita</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lucro</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200" id="relatorios-table">
+                                    <!-- Relatórios serão carregados via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico Section -->
+                <div id="historico-section" class="section hidden">
+                    <!-- Conteúdo similar ao original mas com melhorias -->
+                </div>
+            </main>
         </div>
     </div>
 
@@ -1363,9 +1287,6 @@
     
     <!-- Inicialização do App -->
     <script>
-    function atualizarSelectClientes() {
-      // Função stub para evitar erro de função não definida
-    }
     // Sidebar mobile toggle
     function toggleSidebar(force) {
       const sidebar = document.getElementById('sidebar');
@@ -1382,56 +1303,6 @@
         overlay.classList.toggle('hidden');
       }
     }
-    // Fecha sidebar ao redimensionar para desktop
-    window.addEventListener('resize', () => {
-      if (window.innerWidth > 768) {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('mobile-overlay').classList.add('hidden');
-      }
-    });
-    // Scroll horizontal automático para tabelas
-    document.querySelectorAll('.glass-card .overflow-x-auto').forEach(el => {
-      el.style.overflowX = 'auto';
-    });
-    // Função para buscar cidade/estado pelo CEP
-    function buscarCepCliente() {
-        const cep = document.getElementById('cep').value.replace(/\D/g, '');
-        if (cep.length !== 8) return;
-        fetch(`https://viacep.com.br/ws/${cep}/json/`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.erro) {
-                    document.getElementById('cidade').value = '';
-                    document.getElementById('estado').value = '';
-                    document.getElementById('cidade').readOnly = false;
-                    document.getElementById('estado').disabled = false;
-                    alert('CEP não encontrado. Preencha manualmente.');
-                } else {
-                    document.getElementById('cidade').value = data.localidade;
-                    document.getElementById('estado').value = data.uf;
-                    document.getElementById('cidade').readOnly = true;
-                    document.getElementById('estado').disabled = true;
-                }
-            })
-            .catch(() => {
-                document.getElementById('cidade').value = '';
-                document.getElementById('estado').value = '';
-                document.getElementById('cidade').readOnly = false;
-                document.getElementById('estado').disabled = false;
-                alert('Erro ao buscar CEP. Preencha manualmente.');
-            });
-    }
-    // Detecta saída do campo CEP
-    if (document.getElementById('cep')) {
-        document.getElementById('cep').addEventListener('blur', buscarCepCliente);
-    }
-    // Se digitar na cidade, habilita estado
-    if (document.getElementById('cidade')) {
-        document.getElementById('cidade').addEventListener('input', function() {
-            if (!this.readOnly) {
-                document.getElementById('estado').disabled = false;
-            }
-        });
-    }
+    // ... existing code ...
     </script>
   </body></html>

@@ -141,10 +141,48 @@ function atualizarSelectFuncionarios(selectId) {
     if (!select) return;
     select.innerHTML = '<option value="">Selecione</option>';
     if (window.state && window.state.equipe) {
+        console.log('Equipe carregada:', window.state.equipe);
         window.state.equipe.forEach(func => {
             select.innerHTML += `<option value="${func.id}">${func.nome} (${func.cargo || 'Sem cargo'})</option>`;
         });
+    } else {
+        console.warn('Nenhum funcionário encontrado no state!');
     }
+}
+
+// Função para atualizar select de clientes
+function atualizarSelectClientes(selectId) {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+    
+    // Limpar o select
+    select.innerHTML = '<option value="">Selecione um cliente</option>';
+    
+    // Carregar clientes do estado global
+    if (window.state && window.state.clientes) {
+        console.log('Clientes carregados:', window.state.clientes);
+        window.state.clientes.forEach(cliente => {
+            select.innerHTML += `<option value="${cliente.id}">${cliente.nome}</option>`;
+        });
+    } else {
+        console.warn('Nenhum cliente encontrado no state!');
+    }
+}
+
+// Função placeholder para evitar erro caso updateCharts não esteja implementada
+function updateCharts() {
+  // Aqui você pode implementar os gráficos futuramente
+}
+
+// Garante que ao abrir o modal de serviço, os selects são atualizados
+const botaoNovoServico = document.querySelector('button[onclick="showModal(\'servico\')"]');
+if (botaoNovoServico) {
+    botaoNovoServico.addEventListener('click', function() {
+        setTimeout(function() {
+            atualizarSelectClientes('servico-cliente');
+            atualizarSelectFuncionarios('servico-tecnico');
+        }, 100);
+    });
 }
 
 // Exportar funções para o escopo global
