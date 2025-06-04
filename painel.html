@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiçosPro | Sistema Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="assets/css/styles.css">
+   
+</head>
+<body class="bg-gray-50">
+    <!-- App Container -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar (Desktop) -->
+        <div class="sidebar fixed h-full text-white w-64 z-20 no-print flex-shrink-0" id="sidebar">
+            <div class="p-6 flex items-center space-x-3 border-b border-white border-opacity-10">
+                <div class="bg-white p-2 rounded-lg">
+                    <i class="fas fa-tools text-indigo-600 text-xl"></i>
+                </div>
+                <span class="logo-text text-xl font-bold whitespace-nowrap">ServiçosPro</span>
+            </div>
+            
+            <div class="p-4 space-y-1 mt-4">
+                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer active" onclick="showSection('dashboard')">
+                    <i class="fas fa-chart-line text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Dashboard</span>
+                </div>
+                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('clientes')">
+                    <i class="fas fa-users text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Clientes</span>
+                </div>
+                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('servicos')">
+                    <i class="fas fa-concierge-bell text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Serviços</span>
+                </div>
+                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('kanban')">
+                    <i class="fas fa-columns text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Quadro Kanban</span>
+                </div>
+                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('equipe')">
+                    <i class="fas fa-user-friends text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Equipe</span>
+                </div>
+                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('orcamentos')">
+                    <i class="fas fa-file-invoice-dollar text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Orçamentos</span>
+                </div>
+                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('recibos')">
+                    <i class="fas fa-receipt text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Recibos</span>
+                </div>
+                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('relatorios')">
+                    <i class="fas fa-chart-bar text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Relatórios</span>
+                </div>
+                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('historico')">
+                    <i class="fas fa-history text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Histórico</span>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-0 w-full p-4 border-t border-white border-opacity-10">
+                <div class="menu-item flex items-center space-x-3 p-3 rounded cursor-pointer" onclick="toggleSidebar()">
+                    <i class="fas fa-chevron-left text-white text-opacity-80 w-6 text-center"></i>
+                    <span class="sidebar-text font-medium">Recolher Menu</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-1 overflow-auto ml-64" id="main-content">
+            <!-- Top Navigation -->
+            <div class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+                <div class="flex items-center space-x-4">
+                    <button class="md:hidden text-gray-500" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-xl font-semibold text-gray-800" id="page-title">Dashboard</h1>
+                </div>
+                
+                <!-- Notificações e Usuário -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <button class="p-2 rounded-full hover:bg-gray-100" id="notifications-button">
+                            <i class="fas fa-bell text-gray-500"></i>
+                            <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500" id="notification-count"></span>
+                        </button>
+                        <div class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50" id="notifications-dropdown">
+                            <div class="px-4 py-2 border-b font-medium text-gray-700">Notificações</div>
+                            <div class="overflow-y-auto max-h-60" id="notifications-list">
+                                <!-- Notificações serão carregadas aqui -->
+                                <div class="px-4 py-2 border-b hover:bg-gray-50 cursor-pointer">
+                                    <div class="text-sm font-medium">Novo serviço atribuído</div>
+                                    <div class="text-xs text-gray-500">Há 2 minutos</div>
+                                </div>
+                            </div>
+                            <div class="px-4 py-2 text-center text-sm text-blue-600 hover:bg-gray-50 cursor-pointer border-t">
+                                Ver todas
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Menu do Usuário -->
+                    <div class="relative">
+                        <button class="flex items-center space-x-2 focus:outline-none" id="user-menu-button">
+                            <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                <span class="text-indigo-600 font-medium" id="user-initials">US</span>
+                            </div>
+                            <span class="hidden md:inline text-sm font-medium" id="user-name">Usuário</span>
+                            <i class="fas fa-chevron-down text-xs text-gray-500 hidden md:inline"></i>
+                        </button>
+                        <div class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" id="user-menu">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Meu Perfil</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Configurações</a>
+                            <div class="border-t"></div>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onclick="logout()">Sair</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seções do Sistema -->
+            <div id="dashboard-section" class="section p-6">
+                <!-- Conteúdo do Dashboard... -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="stat-card bg-white rounded-xl shadow-sm p-6 animate-fadeIn" style="animation-delay: 0.1s">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Serviços Pendentes</p>
+                                <h2 class="text-3xl font-bold mt-2" id="pendentes-count">0</h2>
+                            </div>
+                            <div class="h-12 w-12 rounded-lg bg-amber-100 flex items-center justify-center">
+                                <i class="fas fa-clock text-amber-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-sm text-gray-500"><span class="text-green-500 font-medium">+2.5%</span> vs último mês</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card bg-white rounded-xl shadow-sm p-6 animate-fadeIn" style="animation-delay: 0.2s">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Em Andamento</p>
+                                <h2 class="text-3xl font-bold mt-2" id="andamento-count">0</h2>
+                            </div>
+                            <div class="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                                <i class="fas fa-tools text-blue-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-sm text-gray-500"><span class="text-green-500 font-medium">+5.1%</span> vs último mês</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card bg-white rounded-xl shadow-sm p-6 animate-fadeIn" style="animation-delay: 0.3s">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Concluídos</p>
+                                <h2 class="text-3xl font-bold mt-2" id="concluidos-count">0</h2>
+                            </div>
+                            <div class="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
+                                <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-sm text-gray-500"><span class="text-green-500 font-medium">+12.7%</span> vs último mês</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card bg-white rounded-xl shadow-sm p-6 animate-fadeIn" style="animation-delay: 0.4s">
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Receita Total</p>
+                                <h2 class="text-3xl font-bold mt-2">R$ <span id="receita-total">0</span></h2>
+                            </div>
+                            <div class="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center">
+                                <i class="fas fa-dollar-sign text-purple-500 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <span class="text-sm text-gray-500"><span class="text-green-500 font-medium">+8.3%</span> vs último mês</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráficos e Atividades Recentes -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="lg:col-span-2 glass-card p-6">
+                        <h2 class="text-lg font-semibold mb-4">Evolução de Serviços</h2>
+                        <div class="h-72">
+                            <canvas id="servicesEvolutionChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6">
+                        <h2 class="text-lg font-semibold mb-4">Status dos Serviços</h2>
+                        <div class="h-72">
+                            <canvas id="servicesStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-card p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Atividades Recentes</h2>
+                            <button class="text-sm text-indigo-600 hover:text-indigo-800" onclick="showSection('historico')">Ver tudo</button>
+                        </div>
+                        <div class="divide-y divide-gray-200" id="ultimos-servicos">
+                            <!-- Atividades serão carregadas aqui -->
+                            <div class="py-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                            <i class="fas fa-user text-indigo-600"></i>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">Novo cliente cadastrado</p>
+                                            <p class="text-sm text-gray-500">João Silva - 15/06/2023</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-800">Cliente</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold">Calendário</h2>
+                            <div class="flex space-x-2">
+                                <button class="p-1 rounded hover:bg-gray-100">
+                                    <i class="fas fa-chevron-left text-gray-500"></i>
+                                </button>
+                                <span class="text-sm font-medium">Junho 2023</span>
+                                <button class="p-1 rounded hover:bg-gray-100">
+                                    <i class="fas fa-chevron-right text-gray-500"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-sm text-gray-500 font-medium mb-2">
+                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1" id="calendar-days">
+                            <!-- Dias do calendário serão gerados via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Clientes (mantendo sua versão mas melhorada) -->
+            <div id="clientes-section" class="section hidden p-6">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Gestão de Clientes</h1>
+                    <div class="flex space-x-3">
+                        <div class="relative flex-1 md:w-64">
+                            <input type="text" id="search-cliente" placeholder="Buscar cliente..."
+                                   class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <div class="absolute left-3 top-2.5 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <button onclick="showModal('cliente')" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Novo Cliente</span>
+                        </button>
+                        <button onclick="exportClientes()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100 flex items-center space-x-2">
+                            <i class="fas fa-file-export"></i>
+                            <span>Exportar</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full data-table">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviços</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="clientes-tbody">
+                                <!-- Clientes serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Mostrando <span class="font-medium" id="clientes-start">1</span> a <span class="font-medium" id="clientes-end">10</span> de <span class="font-medium" id="clientes-total">0</span> clientes
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="previousClientPage()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div id="clientes-pagination" class="flex space-x-1">
+                                <!-- Paginação será gerada via JavaScript -->
+                            </div>
+                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="nextClientPage()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Serviços (melhorada com atribuição de funcionários) -->
+            <div id="servicos-section" class="section hidden p-6">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Gestão de Serviços</h1>
+                    <div class="flex space-x-3">
+                        <div class="relative md:w-48">
+                            <select id="filter-status" class="appearance-none w-full pl-3 pr-8 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="all">Todos</option>
+                                <option value="pendente">Pendentes</option>
+                                <option value="andamento">Em Andamento</option>
+                                <option value="aguardando">Aguardando Peça</option>
+                                <option value="concluido">Concluídos</option>
+                            </select>
+                            <div class="absolute right-3 top-2.5 text-gray-400 pointer-events-none">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="relative flex-1 md:w-64">
+                            <input type="text" id="search-servico" placeholder="Buscar serviço..."
+                                   class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <div class="absolute left-3 top-2.5 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <button onclick="showModal('servico')" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Novo Serviço</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full data-table">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Técnico</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="servicos-table">
+                                <!-- Serviços serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Mostrando <span class="font-medium" id="servicos-start">1</span> a <span class="font-medium" id="servicos-end">10</span> de <span class="font-medium" id="servicos-total">0</span> serviços
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="previousServicePage()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div id="servicos-pagination" class="flex space-x-2">
+                                <!-- Paginação será gerada via JavaScript -->
+                            </div>
+                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="nextServicePage()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Kanban (nova funcionalidade) -->
+            <div id="kanban-section" class="section hidden p-6">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Quadro Kanban</h1>
+                    <div class="flex space-x-3">
+                        <div class="relative flex-1 md:w-64">
+                            <select id="filter-kanban" class="w-full pl-3 pr-8 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="all">Todos os técnicos</option>
+                                <!-- Técnicos serão carregados aqui -->
+                            </select>
+                        </div>
+                        <button onclick="refreshKanban()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100 flex items-center space-x-2">
+                            <i class="fas fa-sync-alt"></i>
+                            <span>Atualizar</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Filtros para os cartões Kanban -->
+                    <div class="glass-card p-4">
+                        <div class="grid grid-cols-4 gap-4">
+                            <div class="col-span-4 md:col-span-1">
+                                <label for="kanban-search" class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                                <div class="relative">
+                                    <input type="text" id="kanban-search" placeholder="Buscar serviço..."
+                                           class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <div class="absolute left-3 top-2.5 text-gray-400">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-2 md:col-span-1">
+                                <label for="kanban-priority" class="block text-sm font-medium text-gray-700 mb-1">Prioridade</label>
+                                <select id="kanban-priority" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">Todas</option>
+                                    <option value="alta">Alta</option>
+                                    <option value="media">Média</option>
+                                    <option value="baixa">Baixa</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2 md:col-span-1">
+                                <label for="kanban-date" class="block text-sm font-medium text-gray-700 mb-1">Período</label>
+                                <select id="kanban-date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="today">Hoje</option>
+                                    <option value="this_week">Esta Semana</option>
+                                    <option value="this_month">Este Mês</option>
+                                    <option value="all">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-span-4 md:col-span-1">
+                                <label for="kanban-client" class="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
+                                <select id="kanban-client" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">Todos</option>
+                                    <!-- Clientes serão carregados aqui -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Colunas do Kanban -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <!-- Coluna Pendente -->
+                        <div class="kanban-column p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="font-medium text-gray-700">Pendente</h2>
+                                <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-pendente">0</span>
+                            </div>
+                            <div class="space-y-3" id="kanban-pendente" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                <!-- Itens serão carregados via JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- Coluna Em Andamento -->
+                        <div class="kanban-column p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="font-medium text-gray-700">Em Andamento</h2>
+                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-andamento">0</span>
+                            </div>
+                            <div class="space-y-3" id="kanban-andamento" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                <!-- Itens serão carregados via JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- Coluna Aguardando -->
+                        <div class="kanban-column p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="font-medium text-gray-700">Aguardando</h2>
+                                <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-aguardando">0</span>
+                            </div>
+                            <div class="space-y-3" id="kanban-aguardando" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                <!-- Itens serão carregados via JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- Coluna Concluído -->
+                        <div class="kanban-column p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="font-medium text-gray-700">Concluído</h2>
+                                <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded" id="count-concluido">0</span>
+                            </div>
+                            <div class="space-y-3" id="kanban-concluido" ondrop="drop(event)" ondragover="allowDrop(event)">
+                                <!-- Itens serão carregados via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Equipe (nova funcionalidade) -->
+            <div id="equipe-section" class="section hidden p-6">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Gestão da Equipe</h1>
+                    <div class="flex space-x-3">
+                        <div class="relative flex-1 md:w-64">
+                            <input type="text" id="search-equipe" placeholder="Buscar membro..."
+                                   class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <div class="absolute left-3 top-2.5 text-gray-400">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+                        <button onclick="showModal('funcionario')" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Novo Funcionário</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-6">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full data-table">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funcionário</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviços</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="equipe-tbody">
+                                <!-- Funcionários serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="text-sm text-gray-500">
+                            Mostrando <span class="font-medium" id="equipe-start">1</span> a <span class="font-medium" id="equipe-end">10</span> de <span class="font-medium" id="equipe-total">0</span> membros
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="previousTeamPage()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div id="equipe-pagination" class="flex space-x-2">
+                                <!-- Paginação será gerada via JavaScript -->
+                            </div>
+                            <button class="px-3 py-1 border rounded-md text-gray-500 hover:bg-gray-50" onclick="nextTeamPage()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Orçamentos (melhorada) -->
+            <div id="orcamentos-section" class="section hidden p-6">
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Orçamentos</h2>
+                        <button onclick="showModal('orcamento')" class="btn-primary">
+                            <i class="fas fa-plus mr-2"></i>Novo Orçamento
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full data-table">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Validade</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="orcamentos-tbody">
+                                <!-- Orçamentos serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Recibos (melhorada) -->
+            <div id="recibos-section" class="section hidden p-6">
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Recibos</h2>
+                        <button onclick="showModal('recibo')" class="btn-primary">
+                            <i class="fas fa-plus mr-2"></i>Novo Recibo
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full data-table">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Forma de Pagamento</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="recibos-tbody">
+                                <!-- Recibos serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Relatórios (nova funcionalidade) -->
+            <div id="relatorios-section" class="section hidden p-6">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+                    <h1 class="text-2xl font-bold mb-4 md:mb-0">Relatórios e Análises</h1>
+                    <div class="flex space-x-3">
+                        <div class="relative flex-1 md:w-64">
+                            <select id="filter-relatorio" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="mensal">Mensal</option>
+                                <option value="trimestral">Trimestral</option>
+                                <option value="semestral">Semestral</option>
+                                <option value="anual">Anual</option>
+                                <option value="personalizado">Personalizado</option>
+                            </select>
+                        </div>
+                        <button onclick="gerarRelatorio()" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                            <i class="fas fa-file-export"></i>
+                            <span>Exportar</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="glass-card p-6">
+                        <h2 class="text-lg font-semibold mb-4">Desempenho por Técnico</h2>
+                        <div class="h-80">
+                            <canvas id="techPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-card p-6">
+                        <h2 class="text-lg font-semibold mb-4">Receita por Serviço</h2>
+                        <div class="h-80">
+                            <canvas id="serviceRevenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold">Detalhes dos Relatórios</h2>
+                        <div class="flex space-x-3">
+                            <div class="relative">
+                                <input type="date" id="start-date" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <span>até</span>
+                            <div class="relative">
+                                <input type="date" id="end-date" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <button onclick="filterReports()" class="bg-white text-indigo-600 px-4 py-2 rounded-lg border border-indigo-100">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full data-table">
+                            <thead>
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Período</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviços</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receita</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lucro</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="relatorios-table">
+                                <!-- Relatórios serão carregados via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção de Histórico (melhorada) -->
+            <div id="historico-section" class="section hidden p-6">
+                <!-- Conteúdo similar ao original mas com melhorias -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Footer (Celular) -->
+    <div class="mobile-footer no-print" id="mobile-footer">
+        <div class="mobile-footer-item active" onclick="showSection('dashboard')">
+            <i class="fas fa-chart-line"></i>
+            <span>Dashboard</span>
+        </div>
+        <div class="mobile-footer-item" onclick="showSection('servicos')">
+            <i class="fas fa-concierge-bell"></i>
+            <span>Serviços</span>
+        </div>
+        <div class="mobile-footer-item" onclick="showSection('kanban')">
+            <i class="fas fa-columns"></i>
+            <span>Kanban</span>
+        </div>
+        <div class="mobile-footer-item" onclick="showSection('clientes')">
+            <i class="fas fa-users"></i>
+            <span>Clientes</span>
+        </div>
+        <div class="mobile-footer-item" onclick="showSection('relatorios')">
+            <i class="fas fa-chart-bar"></i>
+            <span>Relatórios</span>
+        </div>
+    </div>
+
+    <!-- Modal Cliente (melhorado) -->
+    <div id="cliente-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 animate-fadeIn">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-xl font-bold" id="cliente-modal-title">Novo Cliente</h2>
+                <button onclick="hideModal('cliente')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="cliente-form" class="p-6">
+                <input type="hidden" id="cliente-id">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo*</label>
+                            <input type="text" id="nome" name="nome" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="telefone" class="block text-sm font-medium text-gray-700 mb-1">Telefone*</label>
+                            <input type="text" id="telefone" name="telefone" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF/CNPJ</label>
+                            <input type="text" id="cpf" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="rg" class="block text-sm font-medium text-gray-700 mb-1">RG</label>
+                            <input type="text" id="rg" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="endereco" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                            <input type="text" id="endereco" name="endereco" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="cidade" class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                            <input type="text" id="cidade" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="estado" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                            <select id="estado" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">Selecione</option>
+                                <!-- Estados serão carregados via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="observacoes" class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                            <textarea id="observacoes" rows="2" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal('cliente')" class="px-4 py-2 border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        Salvar Cliente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Serviço (melhorado) -->
+    <div id="servico-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 animate-fadeIn">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-xl font-bold" id="servico-modal-title">Novo Serviço</h2>
+                <button onclick="hideModal('servico')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="servico-form" class="p-6">
+                <input type="hidden" id="servico-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="servico-cliente" class="block text-sm font-medium text-gray-700 mb-1">Cliente*</label>
+                        <select id="servico-cliente" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">Selecione um cliente</option>
+                            <!-- Clientes serão carregados aqui -->
+                        </select>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="servico-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição do Serviço*</label>
+                        <textarea id="servico-descricao" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="servico-categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoria*</label>
+                        <select id="servico-categoria" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">Selecione</option>
+                            <option value="reparo">Reparo</option>
+                            <option value="manutencao">Manutenção</option>
+                            <option value="instalacao">Instalação</option>
+                            <option value="consultoria">Consultoria</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="servico-prioridade" class="block text-sm font-medium text-gray-700 mb-1">Prioridade*</label>
+                        <select id="servico-prioridade" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="alta">Alta</option>
+                            <option value="media" selected>Média</option>
+                            <option value="baixa">Baixa</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="servico-valor" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)*</label>
+                        <input type="number" step="0.01" id="servico-valor" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    
+                    <div>
+                        <label for="servico-custo" class="block text-sm font-medium text-gray-700 mb-1">Custo (R$)</label>
+                        <input type="number" step="0.01" id="servico-custo" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label for="servico-status" class="block text-sm font-medium text-gray-700 mb-1">Status*</label>
+                        <select id="servico-status" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="aguardando">Aguardando Peça</option>
+                            <option value="concluido">Concluído</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="servico-tecnico" class="block text-sm font-medium text-gray-700 mb-1">Técnico Responsável*</label>
+                        <select id="servico-tecnico" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">Selecione</option>
+                            <!-- Técnicos serão carregados aqui -->
+                        </select>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="servico-equipamento" class="block text-sm font-medium text-gray-700 mb-1">Equipamento/Material</label>
+                        <input type="text" id="servico-equipamento" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="servico-data" class="block text-sm font-medium text-gray-700 mb-1">Data de Entrega</label>
+                        <input type="date" id="servico-data" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label for="servico-observacoes" class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                        <textarea id="servico-observacoes" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <div class="flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="servico-garantia" name="servico-garantia" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="servico-garantia" class="font-medium text-gray-700">Serviço com garantia</label>
+                                <p class="text-gray-500">Marque se este serviço inclui período de garantia</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal('servico')" class="px-4 py-2 border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        Salvar Serviço
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Funcionário (nova funcionalidade) -->
+    <div id="funcionario-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 animate-fadeIn">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-xl font-bold" id="funcionario-modal-title">Novo Funcionário</h2>
+                <button onclick="hideModal('funcionario')" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="funcionario-form" class="p-6">
+                <input type="hidden" id="funcionario-id">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome Completo*</label>
+                            <input type="text" id="nome" name="nome" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="cargo" class="block text-sm font-medium text-gray-700 mb-1">Cargo*</label>
+                            <select id="cargo" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                                <option value="">Selecione</option>
+                                <option value="tecnico">Técnico</option>
+                                <option value="atendente">Atendente</option>
+                                <option value="gerente">Gerente</option>
+                                <option value="administrativo">Administrativo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="especialidade" class="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                            <input type="text" id="especialidade" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="telefone" class="block text-sm font-medium text-gray-700 mb-1">Telefone*</label>
+                            <input type="text" id="telefone" name="telefone" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+                            <input type="email" id="email" name="email" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="endereco" class="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                            <input type="text" id="endereco" name="endereco" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="data-admissao" class="block text-sm font-medium text-gray-700 mb-1">Data Admissão*</label>
+                            <input type="date" id="data-admissao" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        </div>
+                        <div>
+                            <label for="salario" class="block text-sm font-medium text-gray-700 mb-1">Salário (R$)</label>
+                            <input type="number" step="0.01" id="salario" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        <div>
+                            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status*</label>
+                            <select id="status" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                                <option value="ativo">Ativo</option>
+                                <option value="ferias">Férias</option>
+                                <option value="afastado">Afastado</option>
+                                <option value="desligado">Desligado</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
+                            <div class="mt-1 flex items-center">
+                                <span class="inline-block h-12 w-12 rounded-full overflow-hidden bg-gray-100">
+                                    <img id="funcionario-foto-preview" class="h-full w-full text-gray-300" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D1D5DB'%3E%3Cpath d='M12 15a3 3 0 100-6 3 3 0 000 6z' /%3E%3Cpath fill-rule='evenodd' d='M1 12a11 11 0 1122 0 11 11 0 01-22 0zm16 0a5 5 0 11-10 0 5 5 0 0110 0z' clip-rule='evenodd' /%3E%3C/svg%3E" alt="">
+                                </span>
+                                <input type="file" id="funcionario-foto" class="hidden" accept="image/*">
+                                <button type="button" onclick="document.getElementById('funcionario-foto').click()" class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Alterar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal('funcionario')" class="px-4 py-2 border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn-primary text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        Salvar Funcionário
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Orçamento (melhorado) -->
+    <div id="orcamento-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4 animate-fadeIn">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-xl font-bold" id="orcamento-modal-title">Novo Orçamento</h2>
+                <div class="flex space-x-3">
+                    <button onclick="imprimirOrcamento()" class="p-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-print text-gray-600"></i>
+                    </button>
+                    <button onclick="hideModal('orcamento')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="orcamento-cliente" class="block text-sm font-medium text-gray-700 mb-1">Cliente*</label>
+                        <select id="orcamento-cliente" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">Selecione um cliente</option>
+                            <!-- Clientes serão carregados aqui -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="orcamento-servico" class="block text-sm font-medium text-gray-700 mb-1">Serviço*</label>
+                        <select id="orcamento-servico" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">Selecione um serviço</option>
+                            <!-- Serviços serão carregados aqui -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="orcamento-valor" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)*</label>
+                        <input type="number" step="0.01" id="orcamento-valor" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    <div>
+                        <label for="orcamento-validade" class="block text-sm font-medium text-gray-700 mb-1">Validade (dias)*</label>
+                        <input type="number" id="orcamento-validade" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" value="7" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="orcamento-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição Detalhada*</label>
+                        <textarea id="orcamento-descricao" rows="3" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
+                    </div>
+                    <div>
+                        <label for="orcamento-pagamento" class="block text-sm font-medium text-gray-700 mb-1">Condições de Pagamento</label>
+                        <select id="orcamento-pagamento" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="avista">À vista</option>
+                            <option value="parcelado">Parcelado</option>
+                            <option value="boleto">Boleto</option>
+                            <option value="cartao">Cartão</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="orcamento-tecnico" class="block text-sm font-medium text-gray-700 mb-1">Técnico Responsável</label>
+                        <select id="orcamento-tecnico" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Selecione</option>
+                            <!-- Técnicos serão carregados aqui -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal('orcamento')" class="px-4 py-2 border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="salvarOrcamento()" class="btn-primary text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        Salvar Orçamento
+                    </button>
+                </div>
+                
+                <!-- Área de impressão do orçamento -->
+                <div id="orcamento-print" class="print-area mt-8 p-6 border rounded-lg hidden">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold">ORÇAMENTO</h2>
+                            <p class="text-gray-600">Nº: <span id="orcamento-numero-print">0001</span></p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold">ServiçosPro</div>
+                            <div class="text-sm text-gray-600">CNPJ: 00.000.000/0000-00</div>
+                            <div class="text-sm text-gray-600">contato@servicospro.com.br</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <p class="font-medium text-gray-700">Cliente:</p>
+                            <p id="orcamento-cliente-print">Nome do Cliente</p>
+                            <p class="text-sm text-gray-600" id="orcamento-cliente-doc-print">CPF/CNPJ: 000.000.000-00</p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-700">Data:</p>
+                            <p id="orcamento-data-print">01/01/2023</p>
+                            <p class="font-medium text-gray-700 mt-2">Validade:</p>
+                            <p id="orcamento-validade-print">7 dias</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <p class="font-medium text-gray-700">Serviço:</p>
+                        <p id="orcamento-descricao-print">Descrição do serviço a ser realizado</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <p class="font-medium text-gray-700">Valor:</p>
+                            <p class="text-xl font-bold" id="orcamento-valor-print">R$ 0,00</p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-700">Condições de Pagamento:</p>
+                            <p id="orcamento-pagamento-print">À vista</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6 border-t pt-4">
+                        <p class="font-medium text-gray-700">Observações:</p>
+                        <p id="orcamento-observacoes-print">Orçamento válido por XX dias a partir da data de emissão.</p>
+                    </div>
+                    
+                    <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border-t pt-4 text-center">
+                            <p class="font-medium">Assinatura do Cliente</p>
+                            <div class="h-16 mt-4 border-b"></div>
+                            <p class="mt-2 text-sm text-gray-500">Nome e CPF/CNPJ</p>
+                        </div>
+                        <div class="border-t pt-4 text-center">
+                            <p class="font-medium">Responsável Técnico</p>
+                            <div class="h-16 mt-4 border-b"></div>
+                            <p class="mt-2 text-sm text-gray-500">Nome e Registro</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Recibo (melhorado) -->
+    <div id="recibo-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4 animate-fadeIn">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h2 class="text-xl font-bold" id="recibo-modal-title">Novo Recibo</h2>
+                <div class="flex space-x-3">
+                    <button onclick="imprimirRecibo()" class="p-2 rounded-lg hover:bg-gray-100">
+                        <i class="fas fa-print text-gray-600"></i>
+                    </button>
+                    <button onclick="hideModal('recibo')" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="recibo-cliente" class="block text-sm font-medium text-gray-700 mb-1">Cliente*</label>
+                        <select id="recibo-cliente" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">Selecione um cliente</option>
+                            <!-- Clientes serão carregados aqui -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="recibo-servico" class="block text-sm font-medium text-gray-700 mb-1">Serviço*</label>
+                        <select id="recibo-servico" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">Selecione um serviço</option>
+                            <!-- Serviços serão carregados aqui -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="recibo-valor" class="block text-sm font-medium text-gray-700 mb-1">Valor (R$)*</label>
+                        <input type="number" step="0.01" id="recibo-valor" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    <div>
+                        <label for="recibo-forma-pagamento" class="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento*</label>
+                        <select id="recibo-forma-pagamento" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="dinheiro">Dinheiro</option>
+                            <option value="cartao">Cartão</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="pix">PIX</option>
+                            <option value="transferencia">Transferência</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="recibo-observacoes" class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                        <textarea id="recibo-observacoes" rows="2" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="hideModal('recibo')" class="px-4 py-2 border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancelar
+                    </button>
+                    <button type="button" onclick="salvarRecibo()" class="btn-primary text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        Salvar Recibo
+                    </button>
+                </div>
+                
+                <!-- Área de impressão do recibo -->
+                <div id="recibo-print" class="print-area mt-8 p-6 border rounded-lg hidden">
+                    <div class="flex justify-between items-start mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold">RECIBO</h2>
+                            <p class="text-gray-600">Nº: <span id="recibo-numero-print">0001</span></p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold">ServiçosPro</div>
+                            <div class="text-sm text-gray-600">CNPJ: 00.000.000/0000-00</div>
+                            <div class="text-sm text-gray-600">contato@servicospro.com.br</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <p class="text-justify">
+                            Eu, <span class="font-bold" id="recibo-empresa-print">ServiçosPro</span>, 
+                            declaro ter recebido de <span class="font-bold" id="recibo-cliente-print">[Nome do Cliente]</span>, 
+                            inscrito(a) no <span class="font-bold">CPF/CNPJ:</span> <span id="recibo-cliente-doc-print">[Documento]</span>, 
+                            a importância de <span class="font-bold" id="recibo-valor-extenso-print">[Valor por extenso]</span> 
+                            (<span class="font-bold" id="recibo-valor-print">R$ 0,00</span>), referente a: 
+                            <span class="font-bold" id="recibo-descricao-print">[Descrição]</span>.
+                        </p>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <p>Forma de Pagamento: <span class="font-bold" id="recibo-forma-pagamento-print">[Forma de pagamento]</span></p>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <p>Emissão: <span class="font-bold" id="recibo-data-print">[Data]</span></p>
+                    </div>
+                    
+                    <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border-t pt-4 text-center">
+                            <p class="font-medium">Assinatura do Cliente</p>
+                            <div class="h-16 mt-4 border-b"></div>
+                            <p class="mt-2 text-sm text-gray-500">Nome e CPF/CNPJ</p>
+                        </div>
+                        <div class="border-t pt-4 text-center">
+                            <p class="font-medium">Responsável Técnico</p>
+                            <div class="h-16 mt-4 border-b"></div>
+                            <p class="mt-2 text-sm text-gray-500">Nome e Registro</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40 hidden">
+        <div class="bg-white rounded-xl p-6 flex flex-col items-center">
+            <div class="h-12 w-12 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin mb-4"></div>
+            <p class="text-gray-700">Carregando...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Configurações e API -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api.js"></script>
+    
+    <!-- Utilitários e UI -->
+    <script src="assets/js/utils.js"></script>
+    <script src="assets/js/ui.js"></script>
+    
+    <!-- Aplicação principal -->
+    <script src="assets/js/app.js"></script>
+    
+    <!-- Inicialização do App -->
+    <script>
+    function atualizarSelectClientes() {
+      // Função stub para evitar erro de função não definida
+    }
+    </script>
+  </body></html>
