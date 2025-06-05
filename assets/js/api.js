@@ -1,7 +1,3 @@
-// Configuração do Supabase
-const SUPABASE_URL = 'https://bnyhgginbhsjeilcclzf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJueWhnZ2luYmhzamVpbGNjbHpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTkzNDg0NTksImV4cCI6MjAxNDkyNDQ1OX0.9XJvqgMQlqC7XZ6B8zLWmZ8vQ8Q5bZ8Z3Z1J2ZJZJZQ';
-
 // Objeto com as funções de API
 const api = {
     // Clientes
