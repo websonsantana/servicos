@@ -1,5 +1,5 @@
 // Módulo principal da aplicação
-const App = (() => {
+window.App = (() => {
     'use strict';
     
     // Estado da aplicação
@@ -1143,6 +1143,10 @@ const App = (() => {
     }
 
     // Retornar métodos públicos
+    // Expor funções que precisam ser acessadas globalmente
+    window.handleOrcamentoSubmit = handleOrcamentoSubmit;
+    window.handleReciboSubmit = handleReciboSubmit;
+    
     return {
         init,
         showSection,
@@ -1173,12 +1177,8 @@ const App = (() => {
     };
 })();
 
-// Inicializar o aplicativo quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', () => {
-    App.init();
-});
-
-async function handleOrcamentoSubmit(e) {
+    // Funções de manipulação de orçamentos e recibos
+    async function handleOrcamentoSubmit(e) {
     showLoading();
     try {
         const formData = new FormData(e.target);
@@ -1292,4 +1292,14 @@ async function handleReciboSubmit(e) {
     }
 }
 
+// Inicializar o aplicativo quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.App && typeof window.App.init === 'function') {
+        window.App.init();
+    } else {
+        console.error('Erro: Módulo App não foi carregado corretamente');
+    }
+});
+
+// Expor funções globais
 window.updateDashboard = updateDashboard;

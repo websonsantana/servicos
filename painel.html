@@ -1,17 +1,35 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WS Soluções | Sistema Completo</title>
+    <title>TecnoService - Painel Administrativo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
     
-    <!-- Configuração do Supabase -->
+    <!-- Configuração do Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e40af',
+                        'primary-light': '#3b82f6',
+                        'primary-dark': '#1e3a8a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    
     <script>
         // Inicialização do Supabase
         const SUPABASE_URL = 'https://bnyhgginbhsjeilcclzf.supabase.co';
@@ -213,56 +231,399 @@
       }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Overlay para sidebar mobile -->
-    <div id="mobile-overlay" class="mobile-overlay fixed inset-0 bg-black bg-opacity-40 z-40 hidden" onclick="toggleSidebar(false)"></div>
-    <!-- App Container -->
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar (Desktop/Mobile) -->
-        <div class="sidebar fixed h-full text-white w-64 z-50 no-print flex-shrink-0 bg-indigo-900" id="sidebar">
-            <div class="p-6 flex items-center space-x-3 border-b border-white border-opacity-10">
-                <div class="bg-white p-2 rounded-lg flex items-center justify-center">
-                    <img src="assets/img/LOGOWS.png" alt="Logo WS" class="h-10 w-auto" style="max-height: 40px;">
-                </div>
-                <span class="logo-text text-xl font-bold whitespace-nowrap">WS Soluções</span>
+<body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen" aria-label="Painel administrativo TecnoService">
+    <!-- Sidebar -->
+    <div class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white overflow-y-auto transition-transform duration-300 ease-in-out transform -translate-x-full lg:translate-x-0 z-50" id="sidebar">
+        <div class="flex items-center justify-between p-6 border-b border-gray-800">
+            <div class="flex items-center">
+                <i class="fas fa-tools text-2xl text-blue-400 mr-3"></i>
+                <span class="text-xl font-bold">TecnoService</span>
             </div>
-            
-            <div class="p-4 space-y-1 mt-4">
-                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer active" onclick="showSection('dashboard')">
-                    <i class="fas fa-chart-line text-white text-opacity-80 w-6 text-center"></i>
-                    <span class="sidebar-text font-medium">Dashboard</span>
+            <button class="lg:hidden text-gray-400 hover:text-white" onclick="toggleSidebar()">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- Menu de Navegação -->
+        <nav class="p-4 space-y-1 flex-1">
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg bg-blue-600 text-white">
+                <i class="fas fa-home mr-3"></i>
+                <span class="sidebar-text">Dashboard</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-users mr-3"></i>
+                <span class="sidebar-text">Clientes</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-tools mr-3"></i>
+                <span class="sidebar-text">Serviços</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-columns mr-3"></i>
+                <span class="sidebar-text">Kanban</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-user-friends mr-3"></i>
+                <span class="sidebar-text">Equipe</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-file-invoice-dollar mr-3"></i>
+                <span class="sidebar-text">Orçamentos</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-receipt mr-3"></i>
+                <span class="sidebar-text">Recibos</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-chart-bar mr-3"></i>
+                <span class="sidebar-text">Relatórios</span>
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                <i class="fas fa-history mr-3"></i>
+                <span class="sidebar-text">Histórico</span>
+            </a>
+        </nav>
+        
+        <!-- Rodapé do Menu -->
+        <div class="mt-auto p-4 border-t border-gray-800">
+            <div class="flex items-center">
+                <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" 
+                     alt="Admin" 
+                     class="w-10 h-10 rounded-full mr-3">
+                <div class="flex-1">
+                    <p class="font-medium">Admin</p>
+                    <p class="text-xs text-gray-400">Administrador</p>
                 </div>
-                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('clientes')">
-                    <i class="fas fa-users text-white text-opacity-80 w-6 text-center"></i>
-                    <span class="sidebar-text font-medium">Clientes</span>
+                <button onclick="logout()" class="text-gray-400 hover:text-white ml-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Conteúdo Principal -->
+    <div class="lg:ml-64 min-h-screen flex flex-col" id="main-content" tabindex="-1">
+        <!-- Top Bar -->
+        <header class="bg-white shadow-sm fixed top-0 right-0 left-0 lg:left-64 h-16 z-30" role="banner">
+            <div class="flex items-center justify-between h-full px-6">
+                <div class="flex items-center">
+                    <button class="lg:hidden text-gray-600 hover:text-gray-900 mr-4" onclick="toggleSidebar()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    
+                    <div class="relative w-64">
+                        <input type="text" 
+                               placeholder="Buscar clientes, serviços..." 
+                               class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
                 </div>
-                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('servicos')">
-                    <i class="fas fa-concierge-bell text-white text-opacity-80 w-6 text-center"></i>
-                    <span class="sidebar-text font-medium">Serviços</span>
+                
+                <div class="flex items-center space-x-4">
+                    <button class="p-2 text-gray-600 hover:text-gray-900 relative">
+                        <i class="far fa-bell text-xl"></i>
+                        <span class="sr-only">Notificações não lidas</span><span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" aria-hidden="true"></span>
+                    </button>
+                    
+                    <div class="h-8 w-px bg-gray-200"></div>
+                    
+                    <div class="flex items-center">
+                        <div class="relative" role="search">
+                            <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" 
+                                 alt="Admin" 
+                                 class="w-8 h-8 rounded-full cursor-pointer"
+                                 id="user-menu-button">
+                            <!-- Dropdown Menu -->
+                            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Meu Perfil</a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Configurações</a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100" role="menuitem" tabindex="-1">
+                                    Sair
+                                </button>
+                            </div>
+                        </div>
+                        <span class="hidden md:inline text-sm font-medium ml-3">Admin</span>
+                    </div>
                 </div>
-                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('kanban')">
-                    <i class="fas fa-columns text-white text-opacity-80 w-6 text-center"></i>
-                    <span class="sidebar-text font-medium">Quadro Kanban</span>
+            </div>
+        </header>
+
+        <!-- Conteúdo -->
+        <main class="flex-1 pt-16">
+            <div class="p-6">
+                <!-- Cabeçalho -->
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-gray-800">Visão Geral</h1>
+                    <p class="text-gray-600">Bem-vindo de volta, Admin! Aqui está o que está acontecendo hoje.</p>
                 </div>
-                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('equipe')">
-                    <i class="fas fa-user-friends text-white text-opacity-80 w-6 text-center"></i>
-                    <span class="sidebar-text font-medium">Equipe</span>
+                
+                <!-- Cartões de Estatísticas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total de Clientes -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md">
+                        <div class="p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Total de Clientes</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">1,248</h3>
+                                    <p class="text-xs text-green-500 mt-1">
+                                        <i class="fas fa-arrow-up mr-1"></i>
+                                        <span>12% do mês passado</span>
+                                    </p>
+                                </div>
+                                <div class="p-3 rounded-lg bg-blue-50 text-blue-500">
+                                    <i class="fas fa-users text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-5 py-3 text-sm text-gray-500">
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Ver todos</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Faturamento Mensal -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md">
+                        <div class="p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Faturamento Mensal</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">R$ 42,5K</h3>
+                                    <p class="text-xs text-green-500 mt-1">
+                                        <i class="fas fa-arrow-up mr-1"></i>
+                                        <span>8% do mês passado</span>
+                                    </p>
+                                </div>
+                                <div class="p-3 rounded-lg bg-green-50 text-green-500">
+                                    <i class="fas fa-dollar-sign text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-5 py-3 text-sm text-gray-500">
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Ver relatório</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Serviços Ativos -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md">
+                        <div class="p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Serviços Ativos</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">48</h3>
+                                    <p class="text-xs text-red-500 mt-1">
+                                        <i class="fas fa-arrow-down mr-1"></i>
+                                        <span>3% do mês passado</span>
+                                    </p>
+                                </div>
+                                <div class="p-3 rounded-lg bg-yellow-50 text-yellow-500">
+                                    <i class="fas fa-tools text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-5 py-3 text-sm text-gray-500">
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Ver serviços</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Tickets Abertos -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-md">
+                        <div class="p-5">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-500">Tickets Abertos</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1">12</h3>
+                                    <p class="text-xs text-green-500 mt-1">
+                                        <i class="fas fa-arrow-down mr-1"></i>
+                                        <span>4 a menos</span>
+                                    </p>
+                                </div>
+                                <div class="p-3 rounded-lg bg-red-50 text-red-500">
+                                    <i class="fas fa-ticket-alt text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-5 py-3 text-sm text-gray-500">
+                            <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Ver tickets</a>
+                        </div>
+                    </div>
                 </div>
-                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('orcamentos')">
-                    <i class="fas fa-file-invoice-dollar text-white text-opacity-80 w-6 text-center"></i>
-                    <span class="sidebar-text font-medium">Orçamentos</span>
+
+                <!-- Gráficos e Atividades -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Gráfico de Faturamento -->
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">Faturamento Mensal</h3>
+                                <p class="text-sm text-gray-500">Visão geral dos últimos 6 meses</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 text-sm rounded-lg bg-blue-50 text-blue-600">Mensal</button>
+                                <button class="px-3 py-1 text-sm rounded-lg text-gray-500 hover:bg-gray-50">Anual</button>
+                            </div>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Atividades Recentes -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100">
+                            <h3 class="text-lg font-semibold text-gray-800">Atividades Recentes</h3>
+                            <p class="text-sm text-gray-500">Últimas atividades do sistema</p>
+                        </div>
+                        <div class="divide-y divide-gray-100">
+                            <!-- Atividade 1 -->
+                            <div class="p-4 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">Novo cliente cadastrado</p>
+                                        <p class="text-sm text-gray-500">João Silva</p>
+                                        <p class="text-xs text-gray-400 mt-1">Há 5 minutos</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Atividade 2 -->
+                            <div class="p-4 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">Serviço finalizado</p>
+                                        <p class="text-sm text-gray-500">Manutenção Notebook</p>
+                                        <p class="text-xs text-gray-400 mt-1">Há 1 hora</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Atividade 3 -->
+                            <div class="p-4 hover:bg-gray-50 transition-colors">
+                                <div class="flex items-start">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-500">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm font-medium text-gray-900">Pagamento atrasado</p>
+                                        <p class="text-sm text-gray-500">Cliente: Maria Santos</p>
+                                        <p class="text-xs text-gray-400 mt-1">Há 3 horas</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 text-center border-t border-gray-100">
+                            <a href="#" class="text-sm font-medium text-blue-600 hover:text-blue-800">Ver todas as atividades</a>
+                        </div>
+                    </div>
                 </div>
-                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('recibos')">
-                    <i class="fas fa-receipt text-white text-opacity-80 w-6 text-center"></i>
-                    <span class="sidebar-text font-medium">Recibos</span>
-                </div>
-                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('relatorios')">
-                    <i class="fas fa-chart-bar text-white text-opacity-80 w-6 text-center"></i>
-                    <span class="sidebar-text font-medium">Relatórios</span>
-                </div>
-                <div class="menu-item flex items-center space-x-3 p-3 cursor-pointer" onclick="showSection('historico')">
-                    <i class="fas fa-history text-white text-opacity-80 w-6 text-center"></i>
-                    <span class="sidebar-text font-medium">Histórico</span>
+
+                <!-- Tabela de Últimos Serviços -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Últimos Serviços</h3>
+                            <p class="text-sm text-gray-500">Lista dos serviços recentemente adicionados</p>
+                        </div>
+                        <a href="#" class="px-4 py-2 bg-blue-50 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-100">
+                            Ver todos
+                        </a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <!-- Linha 1 -->
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#TS-001</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=Joao+Silva&background=3b82f6&color=fff" alt="">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">João Silva</div>
+                                                <div class="text-sm text-gray-500">joao@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Manutenção de Notebook</div>
+                                        <div class="text-sm text-gray-500">Troca de tela</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">10/06/2023</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Concluído
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">R$ 450,00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="#" class="text-blue-600 hover:text-blue-900 mr-3">Ver</a>
+                                        <a href="#" class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                                    </td>
+                                </tr>
+                                <!-- Linha 2 -->
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#TS-002</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=Maria+Santos&background=8b5cf6&color=fff" alt="">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">Maria Santos</div>
+                                                <div class="text-sm text-gray-500">maria@email.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">Formatação de PC</div>
+                                        <div class="text-sm text-gray-500">Instalação de programas</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">09/06/2023</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            Em andamento
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">R$ 150,00</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="#" class="text-blue-600 hover:text-blue-900 mr-3">Ver</a>
+                                        <a href="#" class="text-indigo-600 hover:text-indigo-900">Editar</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="bg-white px-6 py-4 border-t border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="text-sm text-gray-500">
+                                Mostrando <span class="font-medium">1</span> a <span class="font-medium">2</span> de <span class="font-medium">24</span> resultados
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                    Anterior
+                                </button>
+                                <button class="px-3 py-1 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">
+                                    Próximo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -284,16 +645,238 @@
 </button>
 
 <script>
+    // Função para alternar a sidebar em dispositivos móveis
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('-translate-x-full');
+        sidebar.classList.toggle('lg:translate-x-0');
+    }
+
+    // Função para fazer logout
     async function logout() {
         try {
-            const { error } = await supabase.auth.signOut(); // encerra a sessão no Supabase
+            const { error } = await supabase.auth.signOut();
             if (error) throw error;
-
-            window.location.href = 'index.html'; // redireciona
+            window.location.href = 'index.html';
         } catch (err) {
             console.error('Erro ao sair:', err.message);
             alert('Erro ao sair. Tente novamente.');
         }
+    }
+
+    // Fechar sidebar ao clicar fora em dispositivos móveis
+    document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.querySelector('[onclick="toggleSidebar()"]');
+        
+        if (window.innerWidth < 1024 && 
+            !sidebar.contains(event.target) && 
+            !sidebarToggle.contains(event.target) &&
+            !event.target.matches('[onclick="toggleSidebar()"] *')) {
+            sidebar.classList.add('-translate-x-full');
+            sidebar.classList.remove('lg:translate-x-0');
+        }
+    });
+
+    // Toggle do menu do usuário
+    document.addEventListener('DOMContentLoaded', function() {
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userDropdown = document.getElementById('user-dropdown');
+        
+        if (userMenuButton && userDropdown) {
+            userMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('hidden');
+            });
+            
+            // Fechar menu ao clicar fora
+            document.addEventListener('click', function(e) {
+                if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Fechar menu ao pressionar ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const dropdowns = document.querySelectorAll('.hidden[data-dropdown]');
+                dropdowns.forEach(dropdown => dropdown.classList.add('hidden'));
+            }
+        });
+        
+        // Inicializar gráfico de faturamento
+        initRevenueChart();
+        
+        // Verificar autenticação
+        checkAuth();
+
+        // Inicializar funcionalidades da interface
+        initUI();
+
+        // Inicializar gráfico de faturamento
+        initRevenueChart();
+    });
+
+    // Inicializar elementos da interface do usuário
+    function initUI() {
+        // Botão Voltar ao Topo
+        const backToTopButton = document.getElementById('backToTop');
+        
+        if (backToTopButton) {
+            // Mostrar/ocultar o botão ao rolar a página
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    backToTopButton.classList.remove('opacity-0', 'invisible', 'translate-y-4');
+                    backToTopButton.classList.add('opacity-100', 'visible', 'translate-y-0');
+                } else {
+                    backToTopButton.classList.add('opacity-0', 'invisible', 'translate-y-4');
+                    backToTopButton.classList.remove('opacity-100', 'visible', 'translate-y-0');
+                }
+            });
+
+            // Rolar suavemente para o topo ao clicar no botão
+            backToTopButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+                // Focar no cabeçalho principal para acessibilidade
+                const mainHeader = document.querySelector('h1');
+                if (mainHeader) {
+                    mainHeader.setAttribute('tabindex', '-1');
+                    mainHeader.focus();
+                }
+            });
+        }
+    }
+
+    // Mostrar/ocultar indicador de carregamento do gráfico
+    function toggleChartLoader(show = true) {
+        const chartContainer = document.querySelector('#revenueChart').parentElement;
+        let loader = chartContainer.querySelector('.chart-loader');
+        
+        if (show) {
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.className = 'chart-loader absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10';
+                loader.innerHTML = `
+                    <div class="text-center">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                        <p class="mt-2 text-sm text-gray-600">Carregando dados...</p>
+                    </div>
+                `;
+                chartContainer.style.position = 'relative';
+                chartContainer.appendChild(loader);
+            }
+        } else if (loader) {
+            loader.remove();
+        }
+    }
+
+    // Inicializar gráfico de faturamento
+    function initRevenueChart() {
+        const ctx = document.getElementById('revenueChart');
+        if (!ctx) return;
+
+        // Mostrar indicador de carregamento
+        toggleChartLoader(true);
+
+        // Simular carregamento assíncrono
+        setTimeout(() => {
+            try {
+                // Dados de exemplo para o gráfico
+                const labels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+                const data = [3500, 4200, 3800, 4500, 5000, 4800];
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Faturamento (R$)',
+                            data: data,
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: 'white',
+                            pointBorderColor: 'rgba(59, 130, 246, 1)',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'white',
+                                titleColor: '#1F2937',
+                                bodyColor: '#4B5563',
+                                borderColor: '#E5E7EB',
+                                borderWidth: 1,
+                                padding: 12,
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                callbacks: {
+                                    label: function(context) {
+                                        return `R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false,
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    color: '#6B7280'
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#F3F4F6',
+                                    drawBorder: false
+                                },
+                                border: {
+                                    dash: [4, 4],
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#6B7280',
+                                    callback: function(value) {
+                                        return 'R$ ' + value.toLocaleString('pt-BR');
+                                    }
+                                }
+                            }
+                        },
+                        elements: {
+                            line: {
+                                borderJoinStyle: 'round'
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Erro ao carregar o gráfico:', error);
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'text-red-500 text-sm p-4';
+                errorMessage.textContent = 'Erro ao carregar o gráfico. Por favor, atualize a página.';
+                ctx.parentElement.appendChild(errorMessage);
+            } finally {
+                // Esconder indicador de carregamento
+                toggleChartLoader(false);
+            }
+        }, 1000); // Simular atraso de rede
     }
 </script>
 
@@ -689,6 +1272,11 @@
             <p class="text-gray-700">Carregando...</p>
         </div>
     </div>
+
+    <!-- Botão Voltar ao Topo -->
+    <button id="backToTop" class="fixed bottom-8 right-8 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 opacity-0 invisible transform translate-y-4" aria-label="Voltar ao topo">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>

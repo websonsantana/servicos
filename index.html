@@ -124,96 +124,95 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <!-- Script de depuração -->
+    <!-- Script de carregamento simplificado -->
     <script>
-    // Função para verificar se um arquivo existe
-    async function fileExists(url) {
-        try {
-            const response = await fetch(url, { method: 'HEAD' });
-            return response.ok;
-        } catch (error) {
-            console.error(`Erro ao verificar o arquivo ${url}:`, error);
-            return false;
-        }
-    }
-
-    // Função para carregar scripts com verificação
-    async function loadScripts() {
-        // Determinar o caminho base baseado na URL atual
-        let basePath = '';
-        const currentPath = window.location.pathname;
-        
-        // Se estivermos na raiz, não precisamos do ./
-        if (currentPath.endsWith('/') || currentPath.endsWith('index.html')) {
-            basePath = '.'; // Pasta atual
-        }
-        
-        const scripts = [
-            { src: `${basePath}/assets/js/config.js`, name: 'config' },
-            { src: `${basePath}/assets/js/api.js`, name: 'api' },
-            { src: `${basePath}/assets/js/utils.js`, name: 'utils' },
-            { src: `${basePath}/assets/js/ui.js`, name: 'ui' },
-            { src: `${basePath}/assets/js/app.js`, name: 'app' }
-        ];
-        
-        console.log('Caminho base:', basePath);
-
-        for (const script of scripts) {
-            console.log(`Verificando: ${script.src}`);
-            const exists = await fileExists(script.src);
+    // Função para carregar um script
+    function loadScript(src, onSuccess, onError) {
+        return new Promise((resolve, reject) => {
+            console.log(`Tentando carregar: ${src}`);
             
-            if (!exists) {
-                console.error(`Arquivo não encontrado: ${script.src}`);
-                // Mostrar erro na interface
-                const errorDiv = document.createElement('div');
-                errorDiv.style.position = 'fixed';
-                errorDiv.style.top = '0';
-                errorDiv.style.left = '0';
-                errorDiv.style.right = '0';
-                errorDiv.style.backgroundColor = '#fef2f2';
-                errorDiv.style.color = '#991b1b';
-                errorDiv.style.padding = '1rem';
-                errorDiv.style.textAlign = 'center';
-                errorDiv.style.zIndex = '9999';
-                errorDiv.innerHTML = `
-                    <p>Erro: O arquivo <strong>${script.name}.js</strong> não foi encontrado no caminho: <code>${script.src}</code></p>
-                    <p>Por favor, verifique se o arquivo existe no local correto.</p>
-                `;
-                document.body.prepend(errorDiv);
-                return; // Parar se algum arquivo não for encontrado
-            }
-        }
-
-        // Se todos os arquivos existirem, carregá-los
-        console.log('Todos os arquivos foram encontrados. Iniciando carregamento...');
-        
-        for (const script of scripts) {
-            try {
-                await new Promise((resolve, reject) => {
-                    const scriptTag = document.createElement('script');
-                    scriptTag.src = script.src;
-                    scriptTag.onload = () => {
-                        console.log(`Carregado com sucesso: ${script.src}`);
-                        resolve();
-                    };
-                    scriptTag.onerror = () => {
-                        console.error(`Falha ao carregar: ${script.src}`);
-                        reject(new Error(`Falha ao carregar ${script.src}`));
-                    };
-                    document.head.appendChild(scriptTag);
-                });
-            } catch (error) {
-                console.error(`Erro ao carregar ${script.src}:`, error);
-                throw error;
-            }
-        }
-    }
-    
-    // Iniciar o carregamento dos scripts
-    document.addEventListener('DOMContentLoaded', () => {
-        loadScripts().catch(error => {
-            console.error('Erro durante o carregamento dos scripts:', error);
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => {
+                console.log(`Script carregado com sucesso: ${src}`);
+                if (onSuccess) onSuccess();
+                resolve();
+            };
+            script.onerror = (error) => {
+                console.error(`Erro ao carregar o script: ${src}`, error);
+                if (onError) onError(error);
+                reject(new Error(`Falha ao carregar ${src}`));
+            };
+            document.head.appendChild(script);
         });
+    }
+
+    // Função para mostrar mensagem de erro
+    function showError(message) {
+        console.error(message);
+        
+        // Remover mensagens de erro anteriores
+        const existingError = document.getElementById('script-loading-error');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Criar e exibir a mensagem de erro
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'script-loading-error';
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '0';
+        errorDiv.style.left = '0';
+        errorDiv.style.right = '0';
+        errorDiv.style.backgroundColor = '#fef2f2';
+        errorDiv.style.color = '#991b1b';
+        errorDiv.style.padding = '1rem';
+        errorDiv.style.textAlign = 'center';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.style.borderBottom = '1px solid #fecaca';
+        errorDiv.innerHTML = `
+            <p style="margin: 0 0 0.5rem 0; font-weight: 500;">Erro ao carregar o sistema</p>
+            <p style="margin: 0; font-size: 0.9rem;">${message}</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem;">
+                <a href="javascript:window.location.reload()" style="color: #b91c1c; text-decoration: underline;">Recarregar a página</a> ou entre em contato com o suporte.
+            </p>
+        `;
+        document.body.prepend(errorDiv);
+    }
+
+    // Iniciar o carregamento dos scripts quando o DOM estiver pronto
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('DOM carregado, iniciando carregamento dos scripts...');
+        
+        try {
+            // Tentar carregar com caminho relativo primeiro
+            await loadScript('assets/js/config.js');
+            await loadScript('assets/js/api.js');
+            await loadScript('assets/js/utils.js');
+            await loadScript('assets/js/ui.js');
+            await loadScript('assets/js/app.js');
+            
+            console.log('Todos os scripts foram carregados com sucesso!');
+            
+        } catch (error) {
+            console.error('Erro ao carregar scripts:', error);
+            
+            // Se falhar, tentar com caminho relativo diferente
+            try {
+                console.log('Tentando caminho alternativo...');
+                await loadScript('./assets/js/config.js');
+                await loadScript('./assets/js/api.js');
+                await loadScript('./assets/js/utils.js');
+                await loadScript('./assets/js/ui.js');
+                await loadScript('./assets/js/app.js');
+                
+                console.log('Scripts carregados com caminho alternativo!');
+                
+            } catch (secondError) {
+                console.error('Falha ao carregar scripts com caminho alternativo:', secondError);
+                showError('Não foi possível carregar os recursos necessários. Verifique sua conexão e tente novamente.');
+            }
+        }
     });
     </script>
     
