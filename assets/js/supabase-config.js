@@ -4,6 +4,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 // Inicialização do cliente Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.supabase = supabase;
 
 // Configurações de timeout e retry
 const TIMEOUT_DURATION = 30000; // 30 segundos
@@ -94,8 +95,37 @@ const offlineCache = {
     }
 };
 
+// Função de autenticação
+async function checkAuth() {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            window.location.href = 'index.html';
+        }
+        return session;
+    } catch (error) {
+        console.error('Erro na verificação de autenticação:', error);
+        window.location.href = 'index.html';
+    }
+}
+
+// Função para fazer logout
+async function logout() {
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Erro ao sair:', error);
+        alert('Erro ao sair. Tente novamente.');
+    }
+}
+
+// Exportar funções úteis
 export {
     supabase,
+    checkAuth,
+    logout,
     handleError,
     transformResponse,
     validateRequired,
@@ -104,4 +134,4 @@ export {
     offlineCache,
     TIMEOUT_DURATION,
     MAX_RETRIES
-}; 
+};

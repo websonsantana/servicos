@@ -646,551 +646,112 @@
         <!-- Main Content -->
         <div class="main-content flex-1 ml-64 transition-all duration-300">
             <!-- Header -->
-            <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 fixed top-0 right-0 left-64 z-40">
-                <div class="flex items-center space-x-4">
-                    <button onclick="logout()" class="text-gray-500 hover:text-gray-700">
-    <i class="fas fa-sign-out-alt text-xl"></i>
-</button>
-
-<script>
-    // Função para alternar a sidebar em dispositivos móveis
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        sidebar.classList.toggle('-translate-x-full');
-        sidebar.classList.toggle('lg:translate-x-0');
-    }
-
-    // Função para fazer logout
-    async function logout() {
-        try {
-            const { error } = await supabase.auth.signOut();
-            if (error) throw error;
-            window.location.href = 'index.html';
-        } catch (err) {
-            console.error('Erro ao sair:', err.message);
-            alert('Erro ao sair. Tente novamente.');
-        }
-    }
-
-    // Fechar sidebar ao clicar fora em dispositivos móveis
-    document.addEventListener('click', function(event) {
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.querySelector('[onclick="toggleSidebar()"]');
-        
-        if (window.innerWidth < 1024 && 
-            !sidebar.contains(event.target) && 
-            !sidebarToggle.contains(event.target) &&
-            !event.target.matches('[onclick="toggleSidebar()"] *')) {
-            sidebar.classList.add('-translate-x-full');
-            sidebar.classList.remove('lg:translate-x-0');
-        }
-    });
-
-    // Toggle do menu do usuário
-    document.addEventListener('DOMContentLoaded', function() {
-        const userMenuButton = document.getElementById('user-menu-button');
-        const userDropdown = document.getElementById('user-dropdown');
-        
-        if (userMenuButton && userDropdown) {
-            userMenuButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-                userDropdown.classList.toggle('hidden');
-            });
-            
-            // Fechar menu ao clicar fora
-            document.addEventListener('click', function(e) {
-                if (!userMenuButton.contains(e.target) && !userDropdown.contains(e.target)) {
-                    userDropdown.classList.add('hidden');
-                }
-            });
-        }
-        
-        // Fechar menu ao pressionar ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                const dropdowns = document.querySelectorAll('.hidden[data-dropdown]');
-                dropdowns.forEach(dropdown => dropdown.classList.add('hidden'));
-            }
-        });
-        
-        // Inicializar gráfico de faturamento
-        initRevenueChart();
-        
-        // Verificar autenticação
-        checkAuth();
-
-        // Inicializar funcionalidades da interface
-        initUI();
-
-        // Inicializar gráfico de faturamento
-        initRevenueChart();
-    });
-
-    // Inicializar elementos da interface do usuário
-    function initUI() {
-        // Botão Voltar ao Topo
-        const backToTopButton = document.getElementById('backToTop');
-        
-        if (backToTopButton) {
-            // Mostrar/ocultar o botão ao rolar a página
-            window.addEventListener('scroll', () => {
-                if (window.pageYOffset > 300) {
-                    backToTopButton.classList.remove('opacity-0', 'invisible', 'translate-y-4');
-                    backToTopButton.classList.add('opacity-100', 'visible', 'translate-y-0');
-                } else {
-                    backToTopButton.classList.add('opacity-0', 'invisible', 'translate-y-4');
-                    backToTopButton.classList.remove('opacity-100', 'visible', 'translate-y-0');
-                }
-            });
-
-            // Rolar suavemente para o topo ao clicar no botão
-            backToTopButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-                // Focar no cabeçalho principal para acessibilidade
-                const mainHeader = document.querySelector('h1');
-                if (mainHeader) {
-                    mainHeader.setAttribute('tabindex', '-1');
-                    mainHeader.focus();
-                }
-            });
-        }
-    }
-
-    // Mostrar/ocultar indicador de carregamento do gráfico
-    function toggleChartLoader(show = true) {
-        const chartContainer = document.querySelector('#revenueChart').parentElement;
-        let loader = chartContainer.querySelector('.chart-loader');
-        
-        if (show) {
-            if (!loader) {
-                loader = document.createElement('div');
-                loader.className = 'chart-loader absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10';
-                loader.innerHTML = `
-                    <div class="text-center">
-                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                        <p class="mt-2 text-sm text-gray-600">Carregando dados...</p>
-                    </div>
-                `;
-                chartContainer.style.position = 'relative';
-                chartContainer.appendChild(loader);
-            }
-        } else if (loader) {
-            loader.remove();
-        }
-    }
-
-    // Inicializar gráfico de faturamento
-    function initRevenueChart() {
-        const ctx = document.getElementById('revenueChart');
-        if (!ctx) return;
-
-        // Mostrar indicador de carregamento
-        toggleChartLoader(true);
-
-        // Simular carregamento assíncrono
-        setTimeout(() => {
-            try {
-                // Dados de exemplo para o gráfico
-                const labels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
-                const data = [3500, 4200, 3800, 4500, 5000, 4800];
-
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Faturamento (R$)',
-                            data: data,
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: 'white',
-                            pointBorderColor: 'rgba(59, 130, 246, 1)',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: 'white',
-                                titleColor: '#1F2937',
-                                bodyColor: '#4B5563',
-                                borderColor: '#E5E7EB',
-                                borderWidth: 1,
-                                padding: 12,
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                                callbacks: {
-                                    label: function(context) {
-                                        return `R$ ${context.raw.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: {
-                                    display: false,
-                                    drawBorder: false
-                                },
-                                ticks: {
-                                    color: '#6B7280'
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: '#F3F4F6',
-                                    drawBorder: false
-                                },
-                                border: {
-                                    dash: [4, 4],
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#6B7280',
-                                    callback: function(value) {
-                                        return 'R$ ' + value.toLocaleString('pt-BR');
-                                    }
-                                }
-                            }
-                        },
-                        elements: {
-                            line: {
-                                borderJoinStyle: 'round'
-                            }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error('Erro ao carregar o gráfico:', error);
-                const errorMessage = document.createElement('div');
-                errorMessage.className = 'text-red-500 text-sm p-4';
-                errorMessage.textContent = 'Erro ao carregar o gráfico. Por favor, atualize a página.';
-                ctx.parentElement.appendChild(errorMessage);
-            } finally {
-                // Esconder indicador de carregamento
-                toggleChartLoader(false);
-            }
-        }, 1000); // Simular atraso de rede
-    }
-</script>
-
-
-                </div>
-            </header>
-
-            <!-- Content Area -->
-            <div class="pt-16 p-6">
-                <!-- Dashboard Section -->
+            <div class="p-6">
                 <div id="dashboard-section" class="section">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                        <div class="stat-card">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-2">Total de Clientes</h3>
-                            <p class="text-3xl font-bold text-indigo-600" id="total-clientes">0</p>
+                    <!-- Dashboard content -->
+                </div>
+                
+                <!-- Clientes -->
+                <div id="clientes-section" class="section hidden">
+                    <h2 class="text-2xl font-bold mb-6">Gerenciar Clientes</h2>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold">Lista de Clientes</h3>
+                            <button onclick="openModal('novo-cliente')" class="btn-primary">Novo Cliente</button>
                         </div>
-                        <div class="stat-card">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-2">Serviços em Andamento</h3>
-                            <p class="text-3xl font-bold text-indigo-600" id="servicos-andamento">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-2">Orçamentos Pendentes</h3>
-                            <p class="text-3xl font-bold text-indigo-600" id="orcamentos-pendentes">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-2">Receita Mensal</h3>
-                            <p class="text-3xl font-bold text-indigo-600" id="receita-mensal">R$ 0,00</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="glass-card">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-4">Serviços por Status</h3>
-                            <canvas id="servicos-chart"></canvas>
-                        </div>
-                        <div class="glass-card">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-4">Receita por Mês</h3>
-                            <canvas id="receita-chart"></canvas>
+                        <div id="clientes-table">
+                            <!-- Tabela de clientes será carregada dinamicamente -->
                         </div>
                     </div>
                 </div>
-
-                <!-- Clientes -->
-                <section id="clientes-section" class="section hidden">
-                    <h2>Clientes</h2>
-                    <button class="btn-primary" onclick="App.showModal('cliente')">Novo Cliente</button>
-                    <div id="clientes-list"></div>
-                </section>
 
                 <!-- Serviços -->
-                <section id="servicos-section" class="section hidden">
-                    <h2>Serviços</h2>
-                    <button class="btn-primary" onclick="App.showModal('servico')">Novo Serviço</button>
-                    <div id="servicos-list"></div>
-                </section>
-
-                <!-- Equipe -->
-                <section id="equipe-section" class="section hidden">
-                    <h2>Equipe</h2>
-                    <button class="btn-primary" onclick="App.showModal('funcionario')">Novo Funcionário</button>
-                    <div id="equipe-list"></div>
-                </section>
-
-                <!-- Orçamentos -->
-                <section id="orcamentos-section" class="section hidden">
-                    <h2>Orçamentos</h2>
-                    <button class="btn-primary" onclick="App.showModal('orcamento')">Novo Orçamento</button>
-                    <div id="orcamentos-list"></div>
-                </section>
+                <div id="servicos-section" class="section hidden">
+                    <h2 class="text-2xl font-bold mb-6">Gerenciar Serviços</h2>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold">Lista de Serviços</h3>
+                            <button onclick="openModal('novo-servico')" class="btn-primary">Novo Serviço</button>
+                        </div>
+                        <div id="servicos-table">
+                            <!-- Tabela de serviços será carregada dinamicamente -->
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Recibos -->
-                <section id="recibos-section" class="section hidden">
-                    <h2>Recibos</h2>
-                    <button class="btn-primary" onclick="App.showModal('recibo')">Novo Recibo</button>
-                    <div id="recibos-list"></div>
-                </section>
+                <div id="recibos-section" class="section hidden">
+                    <h2 class="text-2xl font-bold mb-6">Gerenciar Recibos</h2>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold">Lista de Recibos</h3>
+                            <button onclick="openModal('novo-recibo')" class="btn-primary">Novo Recibo</button>
+                        </div>
+                        <div id="recibos-table">
+                            <!-- Tabela de recibos será carregada dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orçamentos -->
+                <div id="orcamentos-section" class="section hidden">
+                    <h2 class="text-2xl font-bold mb-6">Gerenciar Orçamentos</h2>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold">Lista de Orçamentos</h3>
+                            <button onclick="openModal('novo-orcamento')" class="btn-primary">Novo Orçamento</button>
+                        </div>
+                        <div id="orcamentos-table">
+                            <!-- Tabela de orçamentos será carregada dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Funcionários -->
+                <div id="equipe-section" class="section hidden">
+                    <h2 class="text-2xl font-bold mb-6">Gerenciar Funcionários</h2>
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold">Lista de Funcionários</h3>
+                            <button onclick="openModal('novo-funcionario')" class="btn-primary">Novo Funcionário</button>
+                        </div>
+                        <div id="funcionarios-table">
+                            <!-- Tabela de funcionários será carregada dinamicamente -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modals -->
-    <!-- Cliente Modal -->
-    <div id="cliente-modal" class="modal hidden">
-        <div class="bg-white rounded-lg shadow-xl p-6">
-            <h3 id="cliente-modal-title" class="text-xl font-bold text-gray-800 mb-4">Novo Cliente</h3>
-            <form id="cliente-form" onsubmit="handleClienteSubmit(event)">
-                <input type="hidden" id="cliente-id" name="id">
-                <div class="space-y-4">
-                    <div>
-                        <label for="nome" class="block text-sm font-medium text-gray-700">Nome</label>
-                        <input type="text" id="nome" name="nome" required class="input-field">
-                    </div>
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="email" name="email" class="input-field">
-                    </div>
-                    <div>
-                        <label for="telefone" class="block text-sm font-medium text-gray-700">Telefone</label>
-                        <input type="tel" id="telefone" name="telefone" class="input-field">
-                    </div>
-                    <div>
-                        <label for="endereco" class="block text-sm font-medium text-gray-700">Endereço</label>
-                        <textarea id="endereco" name="endereco" class="input-field"></textarea>
-                    </div>
+        <!-- Modais -->
+        <div id="modals">
+            <!-- Modal para novo cliente -->
+            <div id="modal-novo-cliente" class="modal hidden">
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold mb-4">Novo Cliente</h3>
+                    <form id="form-novo-cliente">
+                        <div class="space-y-4">
+                            <div>
+                                <label>Nome</label>
+                                <input type="text" name="nome" required class="input-field">
+                            </div>
+                            <div>
+                                <label>Email</label>
+                                <input type="email" name="email" required class="input-field">
+                            </div>
+                            <div>
+                                <label>Telefone</label>
+                                <input type="tel" name="telefone" required class="input-field">
+                            </div>
+                            <button type="submit" class="btn-primary">Salvar</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button type="button" onclick="hideModal('cliente')" class="btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar</button>
-                </div>
-            </form>
+            </div>
+
+            <!-- Outros modais similares para serviços, recibos, orçamentos e funcionários -->
         </div>
     </div>
-
-    <!-- Serviço Modal -->
-    <div id="servico-modal" class="modal hidden">
-        <div class="bg-white rounded-lg shadow-xl p-6">
-            <h3 id="servico-modal-title" class="text-xl font-bold text-gray-800 mb-4">Novo Serviço</h3>
-            <form id="servico-form" onsubmit="handleServicoSubmit(event)">
-                <input type="hidden" id="servico-id" name="id">
-                <div class="space-y-4">
-                    <div>
-                        <label for="servico-cliente" class="block text-sm font-medium text-gray-700">Cliente</label>
-                        <select id="servico-cliente" name="cliente_id" required class="input-field">
-                            <option value="">Selecione um cliente</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="servico-tecnico" class="block text-sm font-medium text-gray-700">Técnico</label>
-                        <select id="servico-tecnico" name="tecnico_id" required class="input-field">
-                            <option value="">Selecione um técnico</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="descricao" class="block text-sm font-medium text-gray-700">Descrição</label>
-                        <textarea id="descricao" name="descricao" required class="input-field"></textarea>
-                    </div>
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                        <select id="status" name="status" required class="input-field">
-                            <option value="pendente">Pendente</option>
-                            <option value="em_andamento">Em Andamento</option>
-                            <option value="concluido">Concluído</option>
-                            <option value="cancelado">Cancelado</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="data_inicio" class="block text-sm font-medium text-gray-700">Data de Início</label>
-                        <input type="date" id="data_inicio" name="data_inicio" required class="input-field">
-                    </div>
-                    <div>
-                        <label for="data_fim" class="block text-sm font-medium text-gray-700">Data de Término</label>
-                        <input type="date" id="data_fim" name="data_fim" class="input-field">
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button type="button" onclick="hideModal('servico')" class="btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Funcionário Modal -->
-    <div id="funcionario-modal" class="modal hidden">
-        <div class="bg-white rounded-lg shadow-xl p-6">
-            <h3 id="funcionario-modal-title" class="text-xl font-bold text-gray-800 mb-4">Novo Funcionário</h3>
-            <form id="funcionario-form" onsubmit="handleFuncionarioSubmit(event)">
-                <input type="hidden" id="funcionario-id" name="id">
-                <div class="space-y-4">
-                    <div>
-                        <label for="nome" class="block text-sm font-medium text-gray-700">Nome</label>
-                        <input type="text" id="nome" name="nome" required class="input-field">
-                    </div>
-                    <div>
-                        <label for="cargo" class="block text-sm font-medium text-gray-700">Cargo</label>
-                        <input type="text" id="cargo" name="cargo" class="input-field">
-                    </div>
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="email" name="email" class="input-field">
-                    </div>
-                    <div>
-                        <label for="telefone" class="block text-sm font-medium text-gray-700">Telefone</label>
-                        <input type="tel" id="telefone" name="telefone" class="input-field">
-                    </div>
-                    <div>
-                        <label for="foto" class="block text-sm font-medium text-gray-700">Foto</label>
-                        <input type="file" id="foto" name="foto" accept="image/*" class="input-field">
-                        <img id="funcionario-foto-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D1D5DB'%3E%3Cpath d='M12 15a3 3 0 100-6 3 3 0 000 6z' /%3E%3Cpath fill-rule='evenodd' d='M1 12a11 11 0 1122 0 11 11 0 01-22 0zm16 0a5 5 0 11-10 0 5 5 0 0110 0z' clip-rule='evenodd' /%3E%3C/svg%3E" class="mt-2 h-32 w-32 rounded-full object-cover">
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button type="button" onclick="hideModal('funcionario')" class="btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Orçamento Modal -->
-    <div id="orcamento-modal" class="modal hidden">
-        <div class="bg-white rounded-lg shadow-xl p-6">
-            <h3 id="orcamento-modal-title" class="text-xl font-bold text-gray-800 mb-4">Novo Orçamento</h3>
-            <form id="orcamento-form" onsubmit="handleOrcamentoSubmit(event)">
-                <input type="hidden" id="orcamento-id" name="id">
-                <div class="space-y-4">
-                    <div>
-                        <label for="orcamento-cliente" class="block text-sm font-medium text-gray-700">Cliente</label>
-                        <select id="orcamento-cliente" name="cliente_id" required class="input-field">
-                            <option value="">Selecione um cliente</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="orcamento-servico" class="block text-sm font-medium text-gray-700">Serviço</label>
-                        <select id="orcamento-servico" name="servico_id" required class="input-field">
-                            <option value="">Selecione um serviço</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="valor" class="block text-sm font-medium text-gray-700">Valor</label>
-                        <input type="number" id="valor" name="valor" step="0.01" required class="input-field">
-                    </div>
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                        <select id="status" name="status" required class="input-field">
-                            <option value="pendente">Pendente</option>
-                            <option value="aprovado">Aprovado</option>
-                            <option value="rejeitado">Rejeitado</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="data_emissao" class="block text-sm font-medium text-gray-700">Data de Emissão</label>
-                        <input type="date" id="data_emissao" name="data_emissao" required class="input-field">
-                    </div>
-                    <div>
-                        <label for="validade" class="block text-sm font-medium text-gray-700">Validade</label>
-                        <input type="date" id="validade" name="validade" class="input-field">
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button type="button" onclick="hideModal('orcamento')" class="btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar</button>
-                </div>
-            </form>
-            <div id="orcamento-print" class="hidden"></div>
-        </div>
-    </div>
-
-    <!-- Recibo Modal -->
-    <div id="recibo-modal" class="modal hidden">
-        <div class="bg-white rounded-lg shadow-xl p-6">
-            <h3 id="recibo-modal-title" class="text-xl font-bold text-gray-800 mb-4">Novo Recibo</h3>
-            <form id="recibo-form" onsubmit="handleReciboSubmit(event)">
-                <input type="hidden" id="recibo-id" name="id">
-                <div class="space-y-4">
-                    <div>
-                        <label for="recibo-cliente" class="block text-sm font-medium text-gray-700">Cliente</label>
-                        <select id="recibo-cliente" name="cliente_id" required class="input-field">
-                            <option value="">Selecione um cliente</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="recibo-servico" class="block text-sm font-medium text-gray-700">Serviço</label>
-                        <select id="recibo-servico" name="servico_id" required class="input-field">
-                            <option value="">Selecione um serviço</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="valor" class="block text-sm font-medium text-gray-700">Valor</label>
-                        <input type="number" id="valor" name="valor" step="0.01" required class="input-field">
-                    </div>
-                    <div>
-                        <label for="data_emissao" class="block text-sm font-medium text-gray-700">Data de Emissão</label>
-                        <input type="date" id="data_emissao" name="data_emissao" required class="input-field">
-                    </div>
-                    <div>
-                        <label for="forma_pagamento" class="block text-sm font-medium text-gray-700">Forma de Pagamento</label>
-                        <select id="forma_pagamento" name="forma_pagamento" required class="input-field">
-                            <option value="dinheiro">Dinheiro</option>
-                            <option value="cartao_credito">Cartão de Crédito</option>
-                            <option value="cartao_debito">Cartão de Débito</option>
-                            <option value="pix">PIX</option>
-                            <option value="transferencia">Transferência</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                    <button type="button" onclick="hideModal('recibo')" class="btn-secondary">Cancelar</button>
-                    <button type="submit" class="btn-primary">Salvar</button>
-                </div>
-            </form>
-            <div id="recibo-print" class="hidden"></div>
-        </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-6 flex flex-col items-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-            <p class="text-gray-700">Carregando...</p>
-        </div>
-    </div>
-
-    <!-- Botão Voltar ao Topo -->
-    <button id="backToTop" class="fixed bottom-8 right-8 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 opacity-0 invisible transform translate-y-4" aria-label="Voltar ao topo">
-        <i class="fas fa-arrow-up"></i>
-    </button>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
@@ -1208,162 +769,65 @@
         dayjs.locale('pt-br');
     </script>
     <script>
-    // Sidebar mobile toggle
-    function toggleSidebar(force) {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('mobile-overlay');
-      if (window.innerWidth > 768) return;
-      if (force === false) {
-        sidebar.classList.remove('open');
-        overlay.classList.add('hidden');
-      } else if (force === true) {
-        sidebar.classList.add('open');
-        overlay.classList.remove('hidden');
-      } else {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('hidden');
-      }
-    }
-    // ... existing code ...
-    </script>
-    <script>
-    function showSection(sectionId) {
-      // Esconde todas as seções
-      document.querySelectorAll('.section').forEach(section => {
-        section.classList.add('hidden');
-      });
-      // Mostra a seção desejada
-      const targetSection = document.getElementById(`${sectionId}-section`);
-      if (targetSection) {
-        targetSection.classList.remove('hidden');
-      }
-      // Atualiza menu ativo
-      document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.dataset.section === sectionId) {
-          item.classList.add('active');
+    // Função para abrir modais
+    function openModal(modalId) {
+        const modal = document.getElementById(`modal-${modalId}`);
+        if (modal) {
+            modal.classList.remove('hidden');
+            // Adicionar overlay
+            const overlay = document.createElement('div');
+            overlay.classList.add('modal-overlay');
+            overlay.onclick = () => closeModal(modalId);
+            document.body.appendChild(overlay);
         }
-      });
-    }
-    window.App = window.App || {};
-    window.App.showSection = showSection;
-
-    // Adiciona listeners aos itens do menu
-    document.querySelectorAll('.menu-item[data-section]').forEach(element => {
-      element.addEventListener('click', (e) => {
-        e.preventDefault();
-        const section = e.currentTarget.dataset.section;
-        App.showSection(section);
-      });
-    });
-    </script>
-	<script>
-// Função para alternar a sidebar em dispositivos móveis
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('-translate-x-full');
-    sidebar.classList.toggle('lg:translate-x-0');
-}
-
-// Função para fazer logout
-async function logout() {
-    try {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        window.location.href = 'index.html';
-    } catch (err) {
-        console.error('Erro ao sair:', err.message);
-        alert('Erro ao sair. Tente novamente.');
-    }
-}
-
-// Inicialização do aplicativo quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', function() {
-    // Verificar autenticação
-    checkAuth();
-    
-    // Configurar listeners do menu
-    const menuItems = document.querySelectorAll('[data-section]');
-    menuItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            const section = this.getAttribute('data-section');
-            showSection(section);
-        });
-    });
-
-    // Configurar botão de toggle do menu mobile
-    const mobileMenuButton = document.querySelector('[onclick="toggleSidebar()"]');
-    if (mobileMenuButton) {
-        mobileMenuButton.addEventListener('click', toggleSidebar);
     }
 
-    // Inicializar gráficos
-    initRevenueChart();
-});
-
-// Função para mostrar seções
-function showSection(sectionId) {
-    // Esconder todas as seções
-    document.querySelectorAll('.section').forEach(section => {
-        section.classList.add('hidden');
-    });
-    
-    // Mostrar a seção solicitada
-    const targetSection = document.getElementById(`${sectionId}-section`);
-    if (targetSection) {
-        targetSection.classList.remove('hidden');
-    }
-    
-    // Atualizar menu ativo
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('data-section') === sectionId) {
-            item.classList.add('active');
-        }
-    });
-}
-
-// Função para verificar autenticação
-async function checkAuth() {
-    try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            window.location.href = 'index.html';
-        }
-    } catch (error) {
-        console.error('Erro na verificação de autenticação:', error);
-        window.location.href = 'index.html';
-    }
-}
-
-// Função para inicializar gráfico de faturamento (exemplo)
-function initRevenueChart() {
-    const ctx = document.getElementById('revenueChart');
-    if (!ctx) return;
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-            datasets: [{
-                label: 'Faturamento Mensal',
-                data: [3500, 4200, 3800, 4500, 5000, 4800],
-                borderColor: 'rgb(59, 130, 246)',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
+    // Função para fechar modais
+    function closeModal(modalId) {
+        const modal = document.getElementById(`modal-${modalId}`);
+        if (modal) {
+            modal.classList.add('hidden');
+            // Remover overlay
+            const overlay = document.querySelector('.modal-overlay');
+            if (overlay) {
+                overlay.remove();
             }
         }
+    }
+
+    // Função para carregar dados das tabelas
+    async function loadTableData(section) {
+        try {
+            const { data, error } = await supabase
+                .from(section)
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            const tableElement = document.getElementById(`${section}-table`);
+            if (tableElement) {
+                // Aqui você pode criar a tabela HTML com os dados
+                // Implementar conforme a estrutura desejada
+            }
+        } catch (error) {
+            console.error('Erro ao carregar dados:', error);
+            alert('Erro ao carregar dados. Tente novamente.');
+        }
+    }
+
+    // Inicializar quando a página carregar
+    window.addEventListener('DOMContentLoaded', async () => {
+        // Verificar autenticação
+        await checkAuth();
+        
+        // Carregar dados iniciais
+        await loadTableData('clientes');
+        await loadTableData('servicos');
+        await loadTableData('recibos');
+        await loadTableData('orcamentos');
+        await loadTableData('funcionarios');
     });
-}
-</script>
-  </body></html>
+    </script>
+</body>
+</html>
