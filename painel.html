@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -1198,7 +1197,12 @@
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/locale/pt-br.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script type="module" src="assets/js/app.js"></script>
+	<script src="assets/js/config.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/app.js"></script>
+	<script src="assets/js/supabase-config.js"></script>
+    <script src="assets/js/ui.js"></script>
+    <script src="assets/js/utils.js"></script>
     <script>
         // Configurar locale do Day.js
         dayjs.locale('pt-br');
@@ -1253,4 +1257,113 @@
       });
     });
     </script>
+	<script>
+// Função para alternar a sidebar em dispositivos móveis
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('-translate-x-full');
+    sidebar.classList.toggle('lg:translate-x-0');
+}
+
+// Função para fazer logout
+async function logout() {
+    try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        window.location.href = 'index.html';
+    } catch (err) {
+        console.error('Erro ao sair:', err.message);
+        alert('Erro ao sair. Tente novamente.');
+    }
+}
+
+// Inicialização do aplicativo quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar autenticação
+    checkAuth();
+    
+    // Configurar listeners do menu
+    const menuItems = document.querySelectorAll('[data-section]');
+    menuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const section = this.getAttribute('data-section');
+            showSection(section);
+        });
+    });
+
+    // Configurar botão de toggle do menu mobile
+    const mobileMenuButton = document.querySelector('[onclick="toggleSidebar()"]');
+    if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', toggleSidebar);
+    }
+
+    // Inicializar gráficos
+    initRevenueChart();
+});
+
+// Função para mostrar seções
+function showSection(sectionId) {
+    // Esconder todas as seções
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.add('hidden');
+    });
+    
+    // Mostrar a seção solicitada
+    const targetSection = document.getElementById(`${sectionId}-section`);
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+    }
+    
+    // Atualizar menu ativo
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-section') === sectionId) {
+            item.classList.add('active');
+        }
+    });
+}
+
+// Função para verificar autenticação
+async function checkAuth() {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+            window.location.href = 'index.html';
+        }
+    } catch (error) {
+        console.error('Erro na verificação de autenticação:', error);
+        window.location.href = 'index.html';
+    }
+}
+
+// Função para inicializar gráfico de faturamento (exemplo)
+function initRevenueChart() {
+    const ctx = document.getElementById('revenueChart');
+    if (!ctx) return;
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Faturamento Mensal',
+                data: [3500, 4200, 3800, 4500, 5000, 4800],
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+}
+</script>
   </body></html>
