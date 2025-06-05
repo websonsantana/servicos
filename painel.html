@@ -927,134 +927,40 @@
                     </div>
                 </div>
 
-                <!-- Clientes Section -->
-                <div id="clientes-section" class="section hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Clientes</h2>
-                        <button onclick="showModal('cliente')" class="btn-primary">
-                            <i class="fas fa-plus mr-2"></i>Novo Cliente
-                        </button>
-                    </div>
-                    <div class="glass-card">
-                        <div class="overflow-x-auto">
-                            <table id="clientes-table" class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <!-- Clientes -->
+                <section id="clientes-section" class="section hidden">
+                    <h2>Clientes</h2>
+                    <button class="btn-primary" onclick="App.showModal('cliente')">Novo Cliente</button>
+                    <div id="clientes-list"></div>
+                </section>
 
-                <!-- Serviços Section -->
-                <div id="servicos-section" class="section hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Serviços</h2>
-                        <button onclick="showModal('servico')" class="btn-primary">
-                            <i class="fas fa-plus mr-2"></i>Novo Serviço
-                        </button>
-                    </div>
-                    <div class="glass-card">
-                        <div class="overflow-x-auto">
-                            <table id="servicos-table" class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição do Serviço</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Técnico</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <!-- Serviços -->
+                <section id="servicos-section" class="section hidden">
+                    <h2>Serviços</h2>
+                    <button class="btn-primary" onclick="App.showModal('servico')">Novo Serviço</button>
+                    <div id="servicos-list"></div>
+                </section>
 
-                <!-- Equipe Section -->
-                <div id="equipe-section" class="section hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Equipe</h2>
-                        <button onclick="showModal('funcionario')" class="btn-primary">
-                            <i class="fas fa-plus mr-2"></i>Novo Funcionário
-                        </button>
-                    </div>
-                    <div class="glass-card">
-                        <div class="overflow-x-auto">
-                            <table id="equipe-table" class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <!-- Equipe -->
+                <section id="equipe-section" class="section hidden">
+                    <h2>Equipe</h2>
+                    <button class="btn-primary" onclick="App.showModal('funcionario')">Novo Funcionário</button>
+                    <div id="equipe-list"></div>
+                </section>
 
-                <!-- Orçamentos Section -->
-                <div id="orcamentos-section" class="section hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Orçamentos</h2>
-                        <button onclick="showModal('orcamento')" class="btn-primary">
-                            <i class="fas fa-plus mr-2"></i>Novo Orçamento
-                        </button>
-                    </div>
-                    <div class="glass-card">
-                        <div class="overflow-x-auto">
-                            <table id="orcamentos-table" class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <!-- Orçamentos -->
+                <section id="orcamentos-section" class="section hidden">
+                    <h2>Orçamentos</h2>
+                    <button class="btn-primary" onclick="App.showModal('orcamento')">Novo Orçamento</button>
+                    <div id="orcamentos-list"></div>
+                </section>
 
-                <!-- Recibos Section -->
-                <div id="recibos-section" class="section hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Recibos</h2>
-                        <button onclick="showModal('recibo')" class="btn-primary">
-                            <i class="fas fa-plus mr-2"></i>Novo Recibo
-                        </button>
-                    </div>
-                    <div class="glass-card">
-                        <div class="overflow-x-auto">
-                            <table id="recibos-table" class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serviço</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                <!-- Recibos -->
+                <section id="recibos-section" class="section hidden">
+                    <h2>Recibos</h2>
+                    <button class="btn-primary" onclick="App.showModal('recibo')">Novo Recibo</button>
+                    <div id="recibos-list"></div>
+                </section>
             </div>
         </div>
     </div>
@@ -1315,5 +1221,36 @@
       }
     }
     // ... existing code ...
+    </script>
+    <script>
+    function showSection(sectionId) {
+      // Esconde todas as seções
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      // Mostra a seção desejada
+      const targetSection = document.getElementById(`${sectionId}-section`);
+      if (targetSection) {
+        targetSection.classList.remove('hidden');
+      }
+      // Atualiza menu ativo
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.dataset.section === sectionId) {
+          item.classList.add('active');
+        }
+      });
+    }
+    window.App = window.App || {};
+    window.App.showSection = showSection;
+
+    // Adiciona listeners aos itens do menu
+    document.querySelectorAll('.menu-item[data-section]').forEach(element => {
+      element.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = e.currentTarget.dataset.section;
+        App.showSection(section);
+      });
+    });
     </script>
   </body></html>
