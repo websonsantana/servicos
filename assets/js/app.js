@@ -1,3 +1,7 @@
+import api from './api.js';
+import { formatDate, formatCurrency, formatPhone, formatDocument } from './utils.js';
+import { showSection, showModal, hideModal, showLoading, hideLoading, showAlert } from './ui.js';
+
 // Módulo principal da aplicação
 window.App = (() => {
     'use strict';
@@ -16,7 +20,9 @@ window.App = (() => {
         currentFuncionarioPage: 1,
         itemsPerPage: 10,
         servicesEvolutionChart: null,
-        servicesStatusChart: null
+        servicesStatusChart: null,
+        unsubscribeFunctions: new Map(),
+        isOnline: navigator.onLine
     };
 
     // Expor o estado globalmente
@@ -25,93 +31,141 @@ window.App = (() => {
     // Inicialização do aplicativo
     async function init() {
         try {
-            // Configurar eventos
-            setupEventListeners();
+            showLoading();
             
             // Verificar autenticação
-            await checkAuth();
+            const user = await api.getCurrentUser();
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            state.currentUser = user;
+            
+            // Configurar listeners de conexão
+            setupConnectionListeners();
             
             // Carregar dados iniciais
             await carregarDadosIniciais();
             
-            // Inicializar gráficos
+            // Configurar listeners de eventos
+            setupEventListeners();
+            
+            // Configurar subscriptions em tempo real
+            setupRealtimeSubscriptions();
+            
+            // Inicializar UI
+            updateAuthUI(true);
+            showSection('dashboard');
             initCharts();
             
-            // Mostrar dashboard por padrão
-            showSection('dashboard');
+            hideLoading();
         } catch (error) {
-            console.error('Erro ao inicializar o aplicativo:', error);
-            mostrarMensagem('Erro', 'Não foi possível inicializar o aplicativo', 'error');
+            console.error('Erro na inicialização:', error);
+            showAlert('Erro ao inicializar a aplicação', 'error');
+            hideLoading();
         }
+    }
+
+    // Configurar listeners de conexão
+    function setupConnectionListeners() {
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+    }
+
+    // Manipular evento online
+    async function handleOnline() {
+        state.isOnline = true;
+        showAlert('Conexão restabelecida', 'success');
+        
+        // Recarregar dados
+        await carregarDadosIniciais();
+        
+        // Reconectar subscriptions
+        setupRealtimeSubscriptions();
+    }
+
+    // Manipular evento offline
+    function handleOffline() {
+        state.isOnline = false;
+        showAlert('Modo offline ativado - algumas funcionalidades podem estar limitadas', 'warning');
+        
+        // Limpar subscriptions existentes
+        state.unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
+        state.unsubscribeFunctions.clear();
     }
 
     // Configurar event listeners
     function setupEventListeners() {
-        // Eventos de navegação
-        document.querySelectorAll('[data-section]').forEach(button => {
-            button.addEventListener('click', (e) => {
+        // Navegação
+        document.querySelectorAll('[data-section]').forEach(element => {
+            element.addEventListener('click', (e) => {
                 e.preventDefault();
-                const section = button.getAttribute('data-section');
+                const section = e.currentTarget.dataset.section;
                 showSection(section);
             });
         });
+        
+        // Formulários
+        document.getElementById('cliente-form')?.addEventListener('submit', handleClienteSubmit);
+        document.getElementById('servico-form')?.addEventListener('submit', handleServicoSubmit);
+        document.getElementById('funcionario-form')?.addEventListener('submit', handleFuncionarioSubmit);
+        document.getElementById('orcamento-form')?.addEventListener('submit', handleOrcamentoSubmit);
+        document.getElementById('recibo-form')?.addEventListener('submit', handleReciboSubmit);
+        
+        // Logout
+        document.querySelector('[data-action="logout"]')?.addEventListener('click', handleLogout);
+        
+        // Mobile menu
+        document.querySelector('[data-action="toggle-menu"]')?.addEventListener('click', toggleMobileMenu);
+    }
 
-        // Eventos de formulários
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const formId = form.id;
-                const handler = formHandlers[formId];
-                if (handler) handler(e);
+    // Configurar subscriptions em tempo real
+    function setupRealtimeSubscriptions() {
+        if (!state.isOnline) return;
+
+        const tables = ['clientes', 'servicos', 'equipe', 'orcamentos', 'recibos'];
+        
+        // Limpar subscriptions existentes
+        state.unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
+        state.unsubscribeFunctions.clear();
+        
+        tables.forEach(table => {
+            const unsubscribe = api.subscribeToChanges(table, (payload) => {
+                console.log(`Mudança em ${table}:`, payload);
+                handleRealtimeChange(table, payload);
             });
-        });
-
-        // Eventos de clique para ações
-        document.addEventListener('click', (e) => {
-            const actionElement = e.target.closest('[data-action]');
-            if (!actionElement) return;
-
-            const action = actionElement.getAttribute('data-action');
-            const id = actionElement.getAttribute('data-id');
-            const handler = actionHandlers[action];
-            
-            if (handler) {
-                e.preventDefault();
-                handler(id, actionElement);
-            }
+            state.unsubscribeFunctions.set(table, unsubscribe);
         });
     }
 
-    // Handlers de formulários
-    const formHandlers = {
-        'cliente-form': handleClienteSubmit,
-        'servico-form': handleServicoSubmit,
-        'funcionario-form': handleFuncionarioSubmit,
-        'orcamento-form': handleOrcamentoSubmit,
-        'recibo-form': handleReciboSubmit
-    };
+    // Manipular mudanças em tempo real
+    function handleRealtimeChange(table, payload) {
+        const { eventType, new: newRecord, old: oldRecord } = payload;
+        
+        switch (eventType) {
+            case 'INSERT':
+                state[table] = [...state[table], newRecord];
+                break;
+            case 'UPDATE':
+                state[table] = state[table].map(item => 
+                    item.id === newRecord.id ? newRecord : item
+                );
+                break;
+            case 'DELETE':
+                state[table] = state[table].filter(item => 
+                    item.id !== oldRecord.id
+                );
+                break;
+        }
+        
+        // Atualizar UI
+        updateUI(table);
+        
+        // Notificar usuário
+        showAlert(`${table} atualizado com sucesso`, 'success');
+    }
 
     // Funções de autenticação
-    async function checkAuth() {
-        try {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
-            if (error) throw error;
-            
-            if (session) {
-                state.currentUser = session.user;
-                updateAuthUI(true);
-            } else {
-                state.currentUser = null;
-                updateAuthUI(false);
-                mostrarMensagem('Atenção', 'Você não está autenticado. Algumas funções podem não estar disponíveis.', 'warning');
-            }
-        } catch (error) {
-            console.error('Erro ao verificar autenticação:', error);
-            mostrarMensagem('Erro', 'Não foi possível verificar a autenticação', 'error');
-        }
-    }
-
     function updateAuthUI(isAuthenticated) {
         const authElements = document.querySelectorAll('[data-auth]');
         authElements.forEach(element => {
@@ -181,61 +235,32 @@ window.App = (() => {
         }
     }
 
-
     // Funções de carregamento de dados
     async function carregarDadosIniciais() {
-        showLoading();
         try {
-            // Carregar clientes
-            const { data: clientes, error: clientesError } = await supabase
-                .from('clientes')
-                .select('*')
-                .order('nome');
-            if (clientesError) throw clientesError;
+            showLoading();
+            
+            const [clientes, servicos, equipe, orcamentos, recibos] = await Promise.all([
+                api.getClientes(),
+                api.getServicos(),
+                api.getEquipe(),
+                api.getOrcamentos(),
+                api.getRecibos()
+            ]);
+
             state.clientes = clientes || [];
-            renderizarClientes();
-
-            // Carregar serviços
-            const { data: servicos, error: servicosError } = await supabase
-                .from('servicos')
-                .select('*')
-                .order('descricao');
-            if (servicosError) throw servicosError;
             state.servicos = servicos || [];
-            renderizarServicos();
-
-            // Carregar equipe
-            const { data: equipe, error: equipeError } = await supabase
-                .from('equipe')
-                .select('*')
-                .order('nome');
-            if (equipeError) throw equipeError;
             state.equipe = equipe || [];
-            renderizarEquipe();
-
-            // Carregar orçamentos
-            const { data: orcamentos, error: orcamentosError } = await supabase
-                .from('orcamentos')
-                .select('*')
-                .order('created_at', { ascending: false });
-            if (orcamentosError) throw orcamentosError;
             state.orcamentos = orcamentos || [];
-            if (typeof renderizarOrcamentos === 'function') renderizarOrcamentos();
-
-            // Carregar recibos
-            const { data: recibos, error: recibosError } = await supabase
-                .from('recibos')
-                .select('*')
-                .order('created_at', { ascending: false });
-            if (recibosError) throw recibosError;
             state.recibos = recibos || [];
-            if (typeof renderizarRecibos === 'function') renderizarRecibos();
 
-            if (typeof updateDashboard === 'function') updateDashboard();
+            // Atualizar UI
+            updateUI();
+            
+            hideLoading();
         } catch (error) {
-            console.error('Erro ao carregar dados iniciais:', error);
-            mostrarMensagem('Erro', 'Não foi possível carregar os dados iniciais', 'error');
-        } finally {
+            console.error('Erro ao carregar dados:', error);
+            showAlert('Erro ao carregar dados', 'error');
             hideLoading();
         }
     }
@@ -532,77 +557,37 @@ window.App = (() => {
 
     // Funções de manipulação de formulários
     async function handleClienteSubmit(e) {
+        e.preventDefault();
         showLoading();
+        
         try {
             const formData = new FormData(e.target);
-            const clienteData = Object.fromEntries(formData.entries());
+            const cliente = {
+                nome: formData.get('nome'),
+                email: formData.get('email'),
+                telefone: formData.get('telefone'),
+                endereco: formData.get('endereco'),
+                cpf: formData.get('cpf'),
+                rg: formData.get('rg')
+            };
             
-            // Validação básica
-            if (!clienteData.nome) {
-                throw new Error('O nome do cliente é obrigatório');
-            }
-            
+            const id = formData.get('id');
             let result;
-            if (clienteData.id) {
-                // Atualizar cliente existente
-                const { data, error } = await supabase
-                    .from('clientes')
-                    .update({
-                        nome: clienteData.nome,
-                        email: clienteData.email || null,
-                        telefone: clienteData.telefone || null,
-                        endereco: clienteData.endereco || null,
-                        atualizado_em: new Date().toISOString()
-                    })
-                    .eq('id', clienteData.id)
-                    .select();
-                
-                if (error) throw error;
-                result = data[0];
-                
-                // Atualizar no estado local
-                const index = state.clientes.findIndex(c => c.id === clienteData.id);
-                if (index !== -1) {
-                    state.clientes[index] = { ...state.clientes[index], ...result };
-                }
-                
-                mostrarMensagem('Sucesso', 'Cliente atualizado com sucesso!');
+            
+            if (id) {
+                result = await api.updateCliente(id, cliente);
+                showAlert('Cliente atualizado com sucesso');
             } else {
-                // Criar novo cliente
-                const { data, error } = await supabase
-                    .from('clientes')
-                    .insert([{
-                        nome: clienteData.nome,
-                        email: clienteData.email || null,
-                        telefone: clienteData.telefone || null,
-                        endereco: clienteData.endereco || null
-                    }])
-                    .select();
-                
-                if (error) throw error;
-                result = data[0];
-                
-                // Adicionar ao estado local
-                state.clientes.push(result);
-                state.clientes.sort((a, b) => a.nome.localeCompare(b.nome));
-                
-                mostrarMensagem('Sucesso', 'Cliente cadastrado com sucesso!');
+                result = await api.createCliente(cliente);
+                showAlert('Cliente criado com sucesso');
             }
             
-            // Atualizar a UI
-            renderizarClientes();
-            
-            // Fechar o modal
             hideModal('cliente');
-            
-            // Resetar o formulário
             e.target.reset();
             
-            return result;
         } catch (error) {
             console.error('Erro ao salvar cliente:', error);
-            mostrarMensagem('Erro', error.message || 'Não foi possível salvar o cliente', 'error');
-            throw error;
+            showAlert('Erro ao salvar cliente', 'error');
         } finally {
             hideLoading();
         }
@@ -773,6 +758,76 @@ window.App = (() => {
     }
 
     // Funções de manipulação de serviços
+    async function handleEditarServico(id) {
+        try {
+            const servico = state.servicos.find(s => s.id === id);
+            if (!servico) {
+                throw new Error('Serviço não encontrado');
+            }
+            
+            // Preencher o formulário
+            const form = document.getElementById('servico-form');
+            if (form) {
+                form.reset();
+                Object.keys(servico).forEach(key => {
+                    if (form.elements[key]) {
+                        form.elements[key].value = servico[key] || '';
+                    }
+                });
+                
+                // Mostrar o modal
+                showModal('servico');
+                
+                // Rolar para o topo do formulário
+                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        } catch (error) {
+            console.error('Erro ao editar serviço:', error);
+            mostrarMensagem('Erro', error.message || 'Não foi possível carregar os dados do serviço', 'error');
+        }
+    }
+    
+    async function handleExcluirServico(id) {
+        try {
+            const confirmacao = await Swal.fire({
+                title: 'Tem certeza?',
+                text: 'Esta ação não pode ser desfeita!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sim, excluir!',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (confirmacao.isConfirmed) {
+                showLoading();
+                
+                // Excluir o serviço
+                const { error } = await supabase
+                    .from('servicos')
+                    .delete()
+                    .eq('id', id);
+                
+                if (error) throw error;
+                
+                // Atualizar o estado local
+                state.servicos = state.servicos.filter(s => s.id !== id);
+                
+                // Atualizar a UI
+                renderizarServicos();
+                
+                mostrarMensagem('Sucesso', 'Serviço excluído com sucesso!');
+            }
+        } catch (error) {
+            console.error('Erro ao excluir serviço:', error);
+            mostrarMensagem('Erro', 'Não foi possível excluir o serviço', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Funções de manipulação de funcionários
     async function handleFuncionarioSubmit(e) {
         showLoading();
         try {
@@ -874,76 +929,6 @@ window.App = (() => {
             console.error('Erro ao salvar funcionário:', error);
             mostrarMensagem('Erro', error.message || 'Não foi possível salvar o funcionário', 'error');
             throw error;
-        } finally {
-            hideLoading();
-        }
-    }
-
-    // Funções de manipulação de serviços
-    async function handleEditarServico(id) {
-        try {
-            const servico = state.servicos.find(s => s.id === id);
-            if (!servico) {
-                throw new Error('Serviço não encontrado');
-            }
-            
-            // Preencher o formulário
-            const form = document.getElementById('servico-form');
-            if (form) {
-                form.reset();
-                Object.keys(servico).forEach(key => {
-                    if (form.elements[key]) {
-                        form.elements[key].value = servico[key] || '';
-                    }
-                });
-                
-                // Mostrar o modal
-                showModal('servico');
-                
-                // Rolar para o topo do formulário
-                form.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        } catch (error) {
-            console.error('Erro ao editar serviço:', error);
-            mostrarMensagem('Erro', error.message || 'Não foi possível carregar os dados do serviço', 'error');
-        }
-    }
-    
-    async function handleExcluirServico(id) {
-        try {
-            const confirmacao = await Swal.fire({
-                title: 'Tem certeza?',
-                text: 'Esta ação não pode ser desfeita!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sim, excluir!',
-                cancelButtonText: 'Cancelar'
-            });
-            
-            if (confirmacao.isConfirmed) {
-                showLoading();
-                
-                // Excluir o serviço
-                const { error } = await supabase
-                    .from('servicos')
-                    .delete()
-                    .eq('id', id);
-                
-                if (error) throw error;
-                
-                // Atualizar o estado local
-                state.servicos = state.servicos.filter(s => s.id !== id);
-                
-                // Atualizar a UI
-                renderizarServicos();
-                
-                mostrarMensagem('Sucesso', 'Serviço excluído com sucesso!');
-            }
-        } catch (error) {
-            console.error('Erro ao excluir serviço:', error);
-            mostrarMensagem('Erro', 'Não foi possível excluir o serviço', 'error');
         } finally {
             hideLoading();
         }
@@ -1053,9 +1038,24 @@ window.App = (() => {
     }
     
     function updateCharts() {
-        // Atualizar gráficos de evolução de serviços
+        // Destruir gráfico de evolução de serviços se já existir
         if (state.servicesEvolutionChart) {
             state.servicesEvolutionChart.destroy();
+            // Remover o canvas antigo e criar um novo
+            const oldCanvas = document.getElementById('services-evolution-chart');
+            if (oldCanvas) {
+                const newCanvas = oldCanvas.cloneNode(false);
+                oldCanvas.parentNode.replaceChild(newCanvas, oldCanvas);
+            }
+        }
+        // Destruir gráfico de status de serviços se já existir
+        if (state.servicesStatusChart) {
+            state.servicesStatusChart.destroy();
+            const oldCanvas2 = document.getElementById('services-status-chart');
+            if (oldCanvas2) {
+                const newCanvas2 = oldCanvas2.cloneNode(false);
+                oldCanvas2.parentNode.replaceChild(newCanvas2, oldCanvas2);
+            }
         }
         
         // Agrupar serviços por mês
@@ -1101,10 +1101,6 @@ window.App = (() => {
         }
         
         // Atualizar gráfico de status de serviços
-        if (state.servicesStatusChart) {
-            state.servicesStatusChart.destroy();
-        }
-        
         const statusCount = {};
         state.servicos.forEach(servico => {
             const status = servico.status || 'ativo';

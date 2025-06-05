@@ -4,50 +4,26 @@
  * Mostra uma seção específica e atualiza a navegação
  * @param {string} section - ID da seção a ser mostrada
  */
-function showSection(section) {
-    // Atualizar título da página
-    const titles = {
-        'dashboard': 'Dashboard',
-        'clientes': 'Clientes',
-        'servicos': 'Serviços',
-        'kanban': 'Quadro Kanban',
-        'equipe': 'Equipe',
-        'orcamentos': 'Orçamentos',
-        'recibos': 'Recibos',
-        'relatorios': 'Relatórios',
-        'historico': 'Histórico'
-    };
-    
-    document.getElementById('page-title').textContent = titles[section] || section;
-    
+export function showSection(sectionId) {
     // Esconder todas as seções
-    document.querySelectorAll('.section').forEach(el => {
-        el.classList.add('hidden');
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.add('hidden');
     });
     
     // Mostrar a seção selecionada
-    document.getElementById(`${section}-section`).classList.remove('hidden');
-    
-    // Atualizar menu ativo
-    document.querySelectorAll('.menu-item').forEach(el => {
-        el.classList.remove('active');
-    });
-    
-    document.querySelectorAll('.mobile-footer-item').forEach(el => {
-        el.classList.remove('active');
-    });
-    
-    const desktopItem = document.querySelector(`.menu-item[onclick="showSection('${section}')"]`);
-    if (desktopItem) desktopItem.classList.add('active');
-    
-    const mobileItem = document.querySelector(`.mobile-footer-item[onclick="showSection('${section}')"]`);
-    if (mobileItem) mobileItem.classList.add('active');
-    
-    // Atualizar gráficos se for a seção de dashboard ou relatórios
-    if (section === 'dashboard' || section === 'relatorios') {
-        setTimeout(() => {
-            updateCharts();
-        }, 100);
+    const section = document.getElementById(`${sectionId}-section`);
+    if (section) {
+        section.classList.remove('hidden');
+        
+        // Atualizar título da página
+        const title = section.querySelector('h2')?.textContent || sectionId;
+        document.title = `TecnoService - ${title}`;
+        
+        // Atualizar navegação
+        updateNavigation(sectionId);
+        
+        // Anunciar para leitores de tela
+        announcePageChange(title);
     }
 }
 
@@ -55,74 +31,123 @@ function showSection(section) {
  * Exibe um modal específico
  * @param {string} type - Tipo do modal (cliente, servico, funcionario, etc.)
  */
-function showModal(type) {
-    document.getElementById(`${type}-modal`).classList.remove('hidden');
+export function showModal(type) {
+    const modal = document.getElementById(`${type}-modal`);
+    if (!modal) return;
     
-    // Resetar formulário se for um novo item
-    if (type !== 'orcamento' && type !== 'recibo') {
-        document.getElementById(`${type}-form`).reset();
-        document.getElementById(`${type}-id`).value = '';
-        
-        if (type === 'cliente') {
-            document.getElementById('cliente-modal-title').textContent = 'Novo Cliente';
-        } else if (type === 'servico') {
-            document.getElementById('servico-modal-title').textContent = 'Novo Serviço';
-            // Atualizar selects
-            atualizarSelectClientes('servico-cliente');
-            atualizarSelectFuncionarios('servico-tecnico');
-        } else if (type === 'funcionario') {
-            document.getElementById('funcionario-modal-title').textContent = 'Novo Funcionário';
-            // Resetar preview da foto
-            document.getElementById('funcionario-foto-preview').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23D1D5DB'%3E%3Cpath d='M12 15a3 3 0 100-6 3 3 0 000 6z' /%3E%3Cpath fill-rule='evenodd' d='M1 12a11 11 0 1122 0 11 11 0 01-22 0zm16 0a5 5 0 11-10 0 5 5 0 0110 0z' clip-rule='evenodd' /%3E%3C/svg%3E";
-        }
+    // Adicionar classe para mostrar o modal
+    modal.classList.remove('hidden');
+    
+    // Focar no primeiro campo do formulário
+    const firstInput = modal.querySelector('input, select, textarea');
+    if (firstInput) {
+        firstInput.focus();
     }
+    
+    // Adicionar event listeners para acessibilidade
+    setupModalAccessibility(modal);
+    
+    // Anunciar para leitores de tela
+    const title = modal.querySelector('h3')?.textContent || type;
+    announceModalOpen(title);
 }
 
 /**
  * Esconde um modal
  * @param {string} type - Tipo do modal a ser escondido
  */
-function hideModal(type) {
-    document.getElementById(`${type}-modal`).classList.add('hidden');
+export function hideModal(type) {
+    const modal = document.getElementById(`${type}-modal`);
+    if (!modal) return;
     
-    // Esconder área de impressão se aplicável
-    if (type === 'orcamento' || type === 'recibo') {
-        document.getElementById(`${type}-print`).classList.add('hidden');
+    // Esconder o modal
+    modal.classList.add('hidden');
+    
+    // Remover event listeners de acessibilidade
+    cleanupModalAccessibility(modal);
+    
+    // Retornar foco ao elemento que abriu o modal
+    const opener = document.activeElement;
+    if (opener) {
+        opener.focus();
     }
+    
+    // Anunciar para leitores de tela
+    announceModalClose();
 }
 
 /**
  * Alterna a barra lateral entre expandida e recolhida
  */
-function toggleSidebar() {
+export function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('collapsed');
+    const overlay = document.getElementById('mobile-overlay');
     
-    const mainContent = document.getElementById('main-content');
-    mainContent.classList.toggle('ml-64');
-    mainContent.classList.toggle('ml-20');
+    if (!sidebar || !overlay) return;
+    
+    const isOpen = !sidebar.classList.contains('-translate-x-full');
+    
+    if (isOpen) {
+        // Fechar sidebar
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    } else {
+        // Abrir sidebar
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+    
+    // Anunciar para leitores de tela
+    announceSidebarToggle(!isOpen);
 }
 
 /**
  * Alterna o menu móvel
  */
-function toggleMobileMenu() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('hidden');
+export function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (!mobileMenu) return;
+    
+    const isOpen = !mobileMenu.classList.contains('hidden');
+    
+    if (isOpen) {
+        mobileMenu.classList.add('hidden');
+    } else {
+        mobileMenu.classList.remove('hidden');
+    }
+    
+    // Anunciar para leitores de tela
+    announceMobileMenuToggle(!isOpen);
 }
 
 /**
  * Mostra a sobreposição de carregamento
  */
-function showLoading() {
-    document.getElementById('loading-overlay').classList.remove('hidden');
+export function showLoading() {
+    const loading = document.getElementById('loading-overlay');
+    if (!loading) return;
+    
+    loading.classList.remove('hidden');
+    loading.setAttribute('aria-busy', 'true');
+    
+    // Anunciar para leitores de tela
+    announceLoading(true);
 }
 
 /**
  * Esconde a sobreposição de carregamento
  */
-function hideLoading() {
-    document.getElementById('loading-overlay').classList.add('hidden');
+export function hideLoading() {
+    const loading = document.getElementById('loading-overlay');
+    if (!loading) return;
+    
+    loading.classList.add('hidden');
+    loading.setAttribute('aria-busy', 'false');
+    
+    // Anunciar para leitores de tela
+    announceLoading(false);
 }
 
 /**
@@ -130,9 +155,24 @@ function hideLoading() {
  * @param {string} message - Mensagem a ser exibida
  * @param {string} type - Tipo de alerta (opcional)
  */
-function showAlert(message, type = 'info') {
-    // Implementação simplificada - você pode usar um toast ou modal de alerta
-    alert(message);
+export function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alert-container');
+    if (!alertContainer) return;
+    
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.setAttribute('role', 'alert');
+    alert.textContent = message;
+    
+    alertContainer.appendChild(alert);
+    
+    // Remover alerta após 5 segundos
+    setTimeout(() => {
+        alert.remove();
+    }, 5000);
+    
+    // Anunciar para leitores de tela
+    announceAlert(message, type);
 }
 
 // Função para atualizar select de técnicos
@@ -183,6 +223,146 @@ if (botaoNovoServico) {
             atualizarSelectFuncionarios('servico-tecnico');
         }, 100);
     });
+}
+
+// Funções de acessibilidade
+function setupModalAccessibility(modal) {
+    // Trap focus dentro do modal
+    const focusableElements = modal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    
+    if (focusableElements.length === 0) return;
+    
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    
+    modal.addEventListener('keydown', handleModalKeydown);
+    
+    function handleModalKeydown(e) {
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === firstFocusable) {
+                    e.preventDefault();
+                    lastFocusable.focus();
+                }
+            } else {
+                if (document.activeElement === lastFocusable) {
+                    e.preventDefault();
+                    firstFocusable.focus();
+                }
+            }
+        }
+        
+        if (e.key === 'Escape') {
+            const modalId = modal.id.replace('-modal', '');
+            hideModal(modalId);
+        }
+    }
+    
+    modal.handleModalKeydown = handleModalKeydown;
+}
+
+function cleanupModalAccessibility(modal) {
+    if (modal.handleModalKeydown) {
+        modal.removeEventListener('keydown', modal.handleModalKeydown);
+        delete modal.handleModalKeydown;
+    }
+}
+
+// Funções de anúncio para leitores de tela
+function announcePageChange(title) {
+    const announcer = document.getElementById('announcer');
+    if (!announcer) return;
+    
+    announcer.textContent = `Página alterada para ${title}`;
+}
+
+function announceModalOpen(title) {
+    const announcer = document.getElementById('announcer');
+    if (!announcer) return;
+    
+    announcer.textContent = `Modal ${title} aberto`;
+}
+
+function announceModalClose() {
+    const announcer = document.getElementById('announcer');
+    if (!announcer) return;
+    
+    announcer.textContent = 'Modal fechado';
+}
+
+function announceSidebarToggle(isOpen) {
+    const announcer = document.getElementById('announcer');
+    if (!announcer) return;
+    
+    announcer.textContent = `Menu lateral ${isOpen ? 'aberto' : 'fechado'}`;
+}
+
+function announceMobileMenuToggle(isOpen) {
+    const announcer = document.getElementById('announcer');
+    if (!announcer) return;
+    
+    announcer.textContent = `Menu mobile ${isOpen ? 'aberto' : 'fechado'}`;
+}
+
+function announceLoading(isLoading) {
+    const announcer = document.getElementById('announcer');
+    if (!announcer) return;
+    
+    announcer.textContent = isLoading ? 'Carregando...' : 'Carregamento concluído';
+}
+
+function announceAlert(message, type) {
+    const announcer = document.getElementById('announcer');
+    if (!announcer) return;
+    
+    announcer.textContent = `Alerta ${type}: ${message}`;
+}
+
+// Funções de navegação
+function updateNavigation(currentSection) {
+    // Atualizar links ativos no menu
+    document.querySelectorAll('[data-section]').forEach(link => {
+        const section = link.getAttribute('data-section');
+        if (section === currentSection) {
+            link.classList.add('active');
+            link.setAttribute('aria-current', 'page');
+        } else {
+            link.classList.remove('active');
+            link.removeAttribute('aria-current');
+        }
+    });
+    
+    // Atualizar breadcrumbs
+    updateBreadcrumbs(currentSection);
+}
+
+function updateBreadcrumbs(currentSection) {
+    const breadcrumbs = document.getElementById('breadcrumbs');
+    if (!breadcrumbs) return;
+    
+    const items = [
+        { label: 'Início', section: 'dashboard' },
+        { label: currentSection.charAt(0).toUpperCase() + currentSection.slice(1), section: currentSection }
+    ];
+    
+    breadcrumbs.innerHTML = items
+        .map((item, index) => {
+            if (index === items.length - 1) {
+                return `<span class="text-gray-500">${item.label}</span>`;
+            }
+            return `
+                <a href="#" 
+                   data-section="${item.section}"
+                   class="text-blue-600 hover:text-blue-800"
+                   onclick="showSection('${item.section}'); return false;">
+                    ${item.label}
+                </a>
+                <span class="mx-2 text-gray-400">/</span>
+            `;
+        })
+        .join('');
 }
 
 // Exportar funções para o escopo global

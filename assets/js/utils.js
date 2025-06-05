@@ -1,80 +1,112 @@
 // Utilitários de data
-function formatarData(data, incluirHora = false) {
-    if (!data) return 'N/A';
+export function formatDate(date, incluirHora = false) {
+    if (!date) return 'N/A';
     
-    const dataObj = new Date(data);
+    const dataObj = new Date(date);
     if (isNaN(dataObj.getTime())) return 'Data inválida';
     
-    const dia = String(dataObj.getDate()).padStart(2, '0');
-    const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
-    const ano = dataObj.getFullYear();
+    const options = {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        ...(incluirHora ? {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        } : {})
+    };
     
-    let dataFormatada = `${dia}/${mes}/${ano}`;
-    
-    if (incluirHora) {
-        const hora = String(dataObj.getHours()).padStart(2, '0');
-        const minutos = String(dataObj.getMinutes()).padStart(2, '0');
-        dataFormatada += ` ${hora}:${minutos}`;
-    }
-    
-    return dataFormatada;
+    return new Intl.DateTimeFormat('pt-BR', options).format(dataObj);
 }
 
-function calcularDiferencaDias(dataInicio, dataFim) {
-    const umDia = 24 * 60 * 60 * 1000; // horas*minutos*segundos*milissegundos
+export function calcularDiferencaDias(dataInicio, dataFim) {
+    const umDia = 24 * 60 * 60 * 1000;
     const inicio = new Date(dataInicio);
-    const fim = new Date(dataFim);
+    const fim = new Date(dataFim || new Date());
     
-    // Resetar o horário para meia-noite para comparar apenas as datas
     inicio.setHours(0, 0, 0, 0);
     fim.setHours(0, 0, 0, 0);
     
-    const diffDias = Math.round(Math.abs((inicio - fim) / umDia));
-    return diffDias;
+    return Math.round(Math.abs((inicio - fim) / umDia));
+}
+
+export function formatRelativeTime(date) {
+    const now = new Date();
+    const diff = now - new Date(date);
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 30) {
+        return formatDate(date);
+    } else if (days > 0) {
+        return `${days} dia${days > 1 ? 's' : ''} atrás`;
+    } else if (hours > 0) {
+        return `${hours} hora${hours > 1 ? 's' : ''} atrás`;
+    } else if (minutes > 0) {
+        return `${minutes} minuto${minutes > 1 ? 's' : ''} atrás`;
+    } else {
+        return 'Agora mesmo';
+    }
 }
 
 // Utilitários de formatação
-function formatarMoeda(valor) {
+export function formatCurrency(valor, currency = 'BRL') {
     if (valor === null || valor === undefined) return 'R$ 0,00';
     
     return new Intl.NumberFormat('pt-BR', {
         style: 'currency',
-        currency: 'BRL'
+        currency
     }).format(valor);
 }
 
-function formatarDocumento(documento) {
+export function formatPhone(telefone) {
+    if (!telefone) return '';
+    
+    const numeros = telefone.replace(/\D/g, '');
+    
+    if (numeros.length === 11) {
+        return numeros.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else if (numeros.length === 10) {
+        return numeros.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    
+    return telefone;
+}
+
+export function formatDocument(documento, tipo = 'auto') {
     if (!documento) return '';
     
-    // Remove caracteres não numéricos
     const numeros = documento.replace(/\D/g, '');
     
-    // Verifica se é CPF (11 dígitos) ou CNPJ (14 dígitos)
-    if (numeros.length === 11) {
+    if (tipo === 'auto') {
+        tipo = numeros.length === 11 ? 'cpf' : 'cnpj';
+    }
+    
+    if (tipo === 'cpf' && numeros.length === 11) {
         return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-    } else if (numeros.length === 14) {
+    } else if (tipo === 'cnpj' && numeros.length === 14) {
         return numeros.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
     }
     
-    // Retorna o valor original se não for CPF nem CNPJ
     return documento;
 }
 
 // Utilitários de validação
-function validarEmail(email) {
+export function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
 }
 
-function validarCPF(cpf) {
+export function validateCPF(cpf) {
+    if (!cpf) return false;
+    
     cpf = cpf.replace(/[\D]/g, '');
     
     if (cpf.length !== 11) return false;
-    
-    // Verifica se todos os dígitos são iguais
     if (/^(\d)\1+$/.test(cpf)) return false;
     
-    // Validação do primeiro dígito verificador
     let soma = 0;
     for (let i = 0; i < 9; i++) {
         soma += parseInt(cpf.charAt(i)) * (10 - i);
@@ -84,7 +116,6 @@ function validarCPF(cpf) {
     
     if (digito1 !== parseInt(cpf.charAt(9))) return false;
     
-    // Validação do segundo dígito verificador
     soma = 0;
     for (let i = 0; i < 10; i++) {
         soma += parseInt(cpf.charAt(i)) * (11 - i);
@@ -95,11 +126,41 @@ function validarCPF(cpf) {
     return digito2 === parseInt(cpf.charAt(10));
 }
 
-// Utilitários de manipulação de arrays e objetos
-function filtrarPorTermo(array, termo, campos) {
-    if (!termo) return array;
+export function validateCNPJ(cnpj) {
+    if (!cnpj) return false;
     
-    const termoLower = termo.toLowerCase();
+    cnpj = cnpj.replace(/[\D]/g, '');
+    
+    if (cnpj.length !== 14) return false;
+    if (/^(\d)\1+$/.test(cnpj)) return false;
+    
+    // Validação do primeiro dígito
+    let soma = 0;
+    let peso = 2;
+    for (let i = 11; i >= 0; i--) {
+        soma += parseInt(cnpj.charAt(i)) * peso;
+        peso = peso === 9 ? 2 : peso + 1;
+    }
+    let digito = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+    if (digito !== parseInt(cnpj.charAt(12))) return false;
+    
+    // Validação do segundo dígito
+    soma = 0;
+    peso = 2;
+    for (let i = 12; i >= 0; i--) {
+        soma += parseInt(cnpj.charAt(i)) * peso;
+        peso = peso === 9 ? 2 : peso + 1;
+    }
+    digito = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+    
+    return digito === parseInt(cnpj.charAt(13));
+}
+
+// Utilitários de manipulação de arrays e objetos
+export function filtrarPorTermo(array, termo, campos) {
+    if (!termo || !array) return array || [];
+    
+    const termoLower = termo.toLowerCase().trim();
     
     return array.filter(item => {
         return campos.some(campo => {
@@ -112,105 +173,197 @@ function filtrarPorTermo(array, termo, campos) {
     });
 }
 
-function ordenarArray(array, campo, direcao = 'asc') {
+export function ordenarArray(array, campo, direcao = 'asc') {
+    if (!array || !campo) return array || [];
+    
+    const collator = new Intl.Collator('pt-BR', {
+        numeric: true,
+        sensitivity: 'base'
+    });
+    
     return [...array].sort((a, b) => {
-        let valorA = a[campo];
-        let valorB = b[campo];
+        let valorA = campo.split('.').reduce((obj, key) => obj && obj[key], a);
+        let valorB = campo.split('.').reduce((obj, key) => obj && obj[key], b);
+        
+        // Tratar valores nulos/undefined
+        if (valorA === null || valorA === undefined) return direcao === 'asc' ? -1 : 1;
+        if (valorB === null || valorB === undefined) return direcao === 'asc' ? 1 : -1;
         
         // Se for data, converter para timestamp
         if (campo.toLowerCase().includes('data') || campo.toLowerCase().includes('dt_')) {
             valorA = new Date(valorA).getTime();
             valorB = new Date(valorB).getTime();
+            return direcao === 'asc' ? valorA - valorB : valorB - valorA;
         }
         
-        // Se for string, converter para minúsculas para comparação case-insensitive
-        if (typeof valorA === 'string') valorA = valorA.toLowerCase();
-        if (typeof valorB === 'string') valorB = valorB.toLowerCase();
+        // Se for número, comparar numericamente
+        if (typeof valorA === 'number' && typeof valorB === 'number') {
+            return direcao === 'asc' ? valorA - valorB : valorB - valorA;
+        }
         
-        if (valorA < valorB) return direcao === 'asc' ? -1 : 1;
-        if (valorA > valorB) return direcao === 'asc' ? 1 : -1;
-        return 0;
+        // Comparar strings usando collator
+        const comparacao = collator.compare(String(valorA), String(valorB));
+        return direcao === 'asc' ? comparacao : -comparacao;
     });
 }
 
-// Utilitários de interface
-function mostrarMensagem(titulo, mensagem, tipo = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white ${
-        tipo === 'success' ? 'bg-green-500' :
-        tipo === 'error' ? 'bg-red-500' :
-        tipo === 'warning' ? 'bg-yellow-500' :
-        'bg-blue-500'
-    }`;
-    
-    toast.innerHTML = `
-        <div class="flex items-center">
-            <div class="flex-shrink-0">
-                ${tipo === 'success' ? '✓' :
-                  tipo === 'error' ? '✕' :
-                  tipo === 'warning' ? '⚠' :
-                  'ℹ'}
-            </div>
-            <div class="ml-3">
-                <h3 class="font-medium">${titulo}</h3>
-                <p class="text-sm">${mensagem}</p>
-            </div>
-            <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
-                &times;
-            </button>
-        </div>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    // Remover automaticamente após 5 segundos
-    setTimeout(() => {
-        if (toast.parentNode) {
-            toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.remove();
-                }
-            }, 300);
-        }
-    }, 5000);
-    
-    return toast;
+// Utilitários de armazenamento
+export function getLocalStorage(key, defaultValue = null) {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+        console.error(`Erro ao ler ${key} do localStorage:`, error);
+        return defaultValue;
+    }
 }
 
-function mostrarCarregamento(mensagem = 'Carregando...') {
-    const overlay = document.createElement('div');
-    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+export function setLocalStorage(key, value) {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+    } catch (error) {
+        console.error(`Erro ao salvar ${key} no localStorage:`, error);
+        return false;
+    }
+}
+
+// Utilitários de performance
+export function debounce(func, wait = 300) {
+    let timeout;
     
-    overlay.innerHTML = `
-        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-            <div class="flex items-center">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mr-3"></div>
-                <span class="text-gray-800">${mensagem}</span>
-            </div>
-        </div>
-    `;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+export function throttle(func, limit = 300) {
+    let inThrottle;
     
-    overlay.id = 'loading-overlay';
-    document.body.appendChild(overlay);
-    
-    return {
-        fechar: () => {
-            if (overlay.parentNode) {
-                overlay.remove();
-            }
+    return function executedFunction(...args) {
+        if (!inThrottle) {
+            func(...args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
         }
     };
 }
 
-// Exportar funções para o escopo global
-window.formatarData = formatarData;
-window.calcularDiferencaDias = calcularDiferencaDias;
-window.formatarMoeda = formatarMoeda;
-window.formatarDocumento = formatarDocumento;
-window.validarEmail = validarEmail;
-window.validarCPF = validarCPF;
-window.filtrarPorTermo = filtrarPorTermo;
-window.ordenarArray = ordenarArray;
-window.mostrarMensagem = mostrarMensagem;
-window.mostrarCarregamento = mostrarCarregamento;
+// Utilitários de URL
+export function getQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    const result = {};
+    
+    for (const [key, value] of params) {
+        result[key] = value;
+    }
+    
+    return result;
+}
+
+export function buildQueryString(params) {
+    return Object.entries(params)
+        .filter(([_, value]) => value !== null && value !== undefined && value !== '')
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join('&');
+}
+
+// Utilitários de formulário
+export function validarFormulario(form, campos) {
+    const erros = {};
+    
+    campos.forEach(({ nome, tipo, obrigatorio, min, max, regex, mensagem }) => {
+        const valor = form[nome];
+        
+        if (obrigatorio && !valor) {
+            erros[nome] = mensagem || 'Campo obrigatório';
+            return;
+        }
+        
+        if (!valor) return;
+        
+        switch (tipo) {
+            case 'email':
+                if (!validateEmail(valor)) {
+                    erros[nome] = mensagem || 'E-mail inválido';
+                }
+                break;
+            
+            case 'cpf':
+                if (!validateCPF(valor)) {
+                    erros[nome] = mensagem || 'CPF inválido';
+                }
+                break;
+            
+            case 'cnpj':
+                if (!validateCNPJ(valor)) {
+                    erros[nome] = mensagem || 'CNPJ inválido';
+                }
+                break;
+            
+            case 'telefone':
+                if (!/^\(\d{2}\) \d{4,5}-\d{4}$/.test(valor)) {
+                    erros[nome] = mensagem || 'Telefone inválido';
+                }
+                break;
+            
+            case 'numero':
+                const num = Number(valor);
+                if (isNaN(num)) {
+                    erros[nome] = mensagem || 'Número inválido';
+                } else if (min !== undefined && num < min) {
+                    erros[nome] = mensagem || `Valor mínimo: ${min}`;
+                } else if (max !== undefined && num > max) {
+                    erros[nome] = mensagem || `Valor máximo: ${max}`;
+                }
+                break;
+            
+            case 'texto':
+                if (min !== undefined && valor.length < min) {
+                    erros[nome] = mensagem || `Mínimo de ${min} caracteres`;
+                } else if (max !== undefined && valor.length > max) {
+                    erros[nome] = mensagem || `Máximo de ${max} caracteres`;
+                }
+                break;
+            
+            case 'regex':
+                if (regex && !regex.test(valor)) {
+                    erros[nome] = mensagem || 'Formato inválido';
+                }
+                break;
+        }
+    });
+    
+    return {
+        valido: Object.keys(erros).length === 0,
+        erros
+    };
+}
+
+// Exportar todas as funções
+export {
+    formatDate,
+    formatCurrency,
+    formatPhone,
+    formatDocument,
+    formatRelativeTime,
+    validateEmail,
+    validateCPF,
+    validateCNPJ,
+    filtrarPorTermo,
+    ordenarArray,
+    calcularDiferencaDias,
+    getLocalStorage,
+    setLocalStorage,
+    debounce,
+    throttle,
+    getQueryParams,
+    buildQueryString,
+    validarFormulario
+};

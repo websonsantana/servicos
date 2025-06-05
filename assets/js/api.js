@@ -1,330 +1,432 @@
-// Objeto com as funções de API
-const api = {
+import { 
+    supabase, 
+    handleError, 
+    transformResponse, 
+    validateRequired,
+    withRetry,
+    checkConnection,
+    offlineCache
+} from './supabase-config.js';
+
+class API {
+    constructor() {
+        this.subscriptions = new Map();
+        this.setupRealtimeListeners();
+    }
+
+    // Configuração dos listeners em tempo real
+    setupRealtimeListeners() {
+        ['clientes', 'servicos', 'equipe', 'orcamentos', 'recibos'].forEach(table => {
+            const channel = supabase
+                .channel(`public:${table}`)
+                .on('postgres_changes', { 
+                    event: '*', 
+                    schema: 'public', 
+                    table 
+                }, payload => {
+                    const callbacks = this.subscriptions.get(table) || [];
+                    callbacks.forEach(callback => callback(payload));
+                })
+                .subscribe();
+        });
+    }
+
+    // Método genérico para operações CRUD com retry e cache
+    async _executeOperation(operation, cacheKey = null, invalidateCache = false) {
+        try {
+            // Verifica conexão
+            const isOnline = await checkConnection();
+            
+            // Se offline e tem cache, retorna do cache
+            if (!isOnline && cacheKey) {
+                const cachedData = offlineCache.get(cacheKey);
+                if (cachedData) return cachedData;
+            }
+            
+            // Executa operação com retry
+            const result = await withRetry(async () => {
+                const response = await operation();
+                if (response.error) throw response.error;
+                return response.data;
+            });
+            
+            // Atualiza cache se necessário
+            if (cacheKey && result) {
+                offlineCache.set(cacheKey, result);
+            }
+            
+            // Limpa cache se solicitado
+            if (invalidateCache) {
+                offlineCache.clear();
+            }
+            
+            return result;
+        } catch (error) {
+            handleError(error);
+        }
+    }
+
     // Clientes
     async getClientes() {
-        const { data, error } = await supabase
-            .from('clientes')
-            .select('*')
-            .order('nome', { ascending: true });
-        
-        if (error) throw error;
-        return data;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('clientes')
+                .select('*')
+                .order('created_at', { ascending: false }),
+            'clientes_list'
+        );
+    }
+
     async getClienteById(id) {
-        const { data, error } = await supabase
-            .from('clientes')
-            .select('*')
-            .eq('id', id)
-            .single();
-        
-        if (error) throw error;
-        return data;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('clientes')
+                .select('*')
+                .eq('id', id)
+                .single(),
+            `cliente_${id}`
+        );
+    }
+
     async createCliente(cliente) {
-        const { data, error } = await supabase
-            .from('clientes')
-            .insert([cliente])
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
+        validateRequired(cliente, ['nome', 'email', 'telefone']);
+        return this._executeOperation(
+            () => supabase
+                .from('clientes')
+                .insert([cliente])
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
     async updateCliente(id, cliente) {
-        const { data, error } = await supabase
-            .from('clientes')
-            .update(cliente)
-            .eq('id', id)
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
+        validateRequired(cliente, ['nome', 'email', 'telefone']);
+        return this._executeOperation(
+            () => supabase
+                .from('clientes')
+                .update(cliente)
+                .eq('id', id)
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
     async deleteCliente(id) {
-        const { error } = await supabase
-            .from('clientes')
-            .delete()
-            .eq('id', id);
-        
-        if (error) throw error;
-        return true;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('clientes')
+                .delete()
+                .eq('id', id),
+            null,
+            true
+        );
+    }
+
     // Serviços
     async getServicos() {
-        const { data, error } = await supabase
-            .from('servicos')
-            .select(`
-                *,
-                cliente:clientes(*),
-                tecnico:equipe(*)
-            `)
-            .order('data_inicio', { ascending: false });
-        
-        if (error) throw error;
-        return data;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('servicos')
+                .select(`
+                    *,
+                    clientes (id, nome),
+                    equipe (id, nome)
+                `)
+                .order('created_at', { ascending: false }),
+            'servicos_list'
+        );
+    }
+
     async getServicoById(id) {
-        const { data, error } = await supabase
-            .from('servicos')
-            .select(`
-                *,
-                cliente:clientes(*),
-                tecnico:equipe(*)
-            `)
-            .eq('id', id)
-            .single();
-        
-        if (error) throw error;
-        return data;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('servicos')
+                .select(`
+                    *,
+                    clientes (id, nome),
+                    equipe (id, nome)
+                `)
+                .eq('id', id)
+                .single(),
+            `servico_${id}`
+        );
+    }
+
     async createServico(servico) {
-        const { data, error } = await supabase
-            .from('servicos')
-            .insert([servico])
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
+        validateRequired(servico, ['cliente_id', 'descricao', 'valor']);
+        return this._executeOperation(
+            () => supabase
+                .from('servicos')
+                .insert([servico])
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
     async updateServico(id, servico) {
-        const { data, error } = await supabase
-            .from('servicos')
-            .update(servico)
-            .eq('id', id)
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
+        validateRequired(servico, ['cliente_id', 'descricao', 'valor']);
+        return this._executeOperation(
+            () => supabase
+                .from('servicos')
+                .update(servico)
+                .eq('id', id)
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
     async deleteServico(id) {
-        const { error } = await supabase
-            .from('servicos')
-            .delete()
-            .eq('id', id);
-        
-        if (error) throw error;
-        return true;
-    },
-    
-    // Equipe (funcionários)
+        return this._executeOperation(
+            () => supabase
+                .from('servicos')
+                .delete()
+                .eq('id', id),
+            null,
+            true
+        );
+    }
+
+    // Equipe
     async getEquipe() {
-        const { data, error } = await supabase
-            .from('equipe')
-            .select('*')
-            .order('nome', { ascending: true });
-        if (error) throw error;
-        return data;
-    },
+        return this._executeOperation(
+            () => supabase
+                .from('equipe')
+                .select('*')
+                .order('created_at', { ascending: false }),
+            'equipe_list'
+        );
+    }
+
     async getFuncionarioById(id) {
-        const { data, error } = await supabase
-            .from('equipe')
-            .select('*')
-            .eq('id', id)
-            .single();
-        if (error) throw error;
-        return data;
-    },
-    async criarFuncionario(funcionarioData) {
-        const { data, error } = await supabase
-            .from('equipe')
-            .insert([funcionarioData])
-            .select();
-        if (error) throw error;
-        return data[0];
-    },
-    async atualizarFuncionario(id, funcionarioData) {
-        const { data, error } = await supabase
-            .from('equipe')
-            .update(funcionarioData)
-            .eq('id', id)
-            .select();
-        if (error) throw error;
-        return data[0];
-    },
+        return this._executeOperation(
+            () => supabase
+                .from('equipe')
+                .select('*')
+                .eq('id', id)
+                .single(),
+            `funcionario_${id}`
+        );
+    }
+
+    async criarFuncionario(funcionario) {
+        validateRequired(funcionario, ['nome', 'cargo', 'email']);
+        return this._executeOperation(
+            () => supabase
+                .from('equipe')
+                .insert([funcionario])
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
+    async atualizarFuncionario(id, funcionario) {
+        validateRequired(funcionario, ['nome', 'cargo', 'email']);
+        return this._executeOperation(
+            () => supabase
+                .from('equipe')
+                .update(funcionario)
+                .eq('id', id)
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
     async excluirFuncionario(id) {
-        const { error } = await supabase
-            .from('equipe')
-            .delete()
-            .eq('id', id);
-        if (error) throw error;
-        return true;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('equipe')
+                .delete()
+                .eq('id', id),
+            null,
+            true
+        );
+    }
+
     // Orçamentos
     async getOrcamentos() {
-        const { data, error } = await supabase
-            .from('orcamentos')
-            .select(`
-                *,
-                cliente:clientes(*),
-                servico:servicos(*)
-            `)
-            .order('data_emissao', { ascending: false });
-        
-        if (error) throw error;
-        return data;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('orcamentos')
+                .select(`
+                    *,
+                    clientes (id, nome),
+                    servicos (id, descricao)
+                `)
+                .order('created_at', { ascending: false }),
+            'orcamentos_list'
+        );
+    }
+
     async getOrcamentoById(id) {
-        const { data, error } = await supabase
-            .from('orcamentos')
-            .select(`
-                *,
-                cliente:clientes(*),
-                servico:servicos(*)
-            `)
-            .eq('id', id)
-            .single();
-        
-        if (error) throw error;
-        return data;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('orcamentos')
+                .select(`
+                    *,
+                    clientes (id, nome),
+                    servicos (id, descricao)
+                `)
+                .eq('id', id)
+                .single(),
+            `orcamento_${id}`
+        );
+    }
+
     async createOrcamento(orcamento) {
-        const { data, error } = await supabase
-            .from('orcamentos')
-            .insert([orcamento])
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
+        validateRequired(orcamento, ['cliente_id', 'servico_id', 'valor']);
+        return this._executeOperation(
+            () => supabase
+                .from('orcamentos')
+                .insert([orcamento])
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
     async updateOrcamento(id, orcamento) {
-        const { data, error } = await supabase
-            .from('orcamentos')
-            .update(orcamento)
-            .eq('id', id)
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
+        validateRequired(orcamento, ['cliente_id', 'servico_id', 'valor']);
+        return this._executeOperation(
+            () => supabase
+                .from('orcamentos')
+                .update(orcamento)
+                .eq('id', id)
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
     async deleteOrcamento(id) {
-        const { error } = await supabase
-            .from('orcamentos')
-            .delete()
-            .eq('id', id);
-        
-        if (error) throw error;
-        return true;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('orcamentos')
+                .delete()
+                .eq('id', id),
+            null,
+            true
+        );
+    }
+
     // Recibos
     async getRecibos() {
-        const { data, error } = await supabase
-            .from('recibos')
-            .select(`
-                *,
-                cliente:clientes(*),
-                servico:servicos(*)
-            `)
-            .order('data_emissao', { ascending: false });
-        
-        if (error) throw error;
-        return data;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('recibos')
+                .select(`
+                    *,
+                    clientes (id, nome),
+                    servicos (id, descricao)
+                `)
+                .order('created_at', { ascending: false }),
+            'recibos_list'
+        );
+    }
+
     async getReciboById(id) {
-        const { data, error } = await supabase
-            .from('recibos')
-            .select(`
-                *,
-                cliente:clientes(*),
-                servico:servicos(*)
-            `)
-            .eq('id', id)
-            .single();
-        
-        if (error) throw error;
-        return data;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('recibos')
+                .select(`
+                    *,
+                    clientes (id, nome),
+                    servicos (id, descricao)
+                `)
+                .eq('id', id)
+                .single(),
+            `recibo_${id}`
+        );
+    }
+
     async createRecibo(recibo) {
-        const { data, error } = await supabase
-            .from('recibos')
-            .insert([recibo])
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
+        validateRequired(recibo, ['cliente_id', 'servico_id', 'valor', 'forma_pagamento']);
+        return this._executeOperation(
+            () => supabase
+                .from('recibos')
+                .insert([recibo])
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
     async updateRecibo(id, recibo) {
-        const { data, error } = await supabase
-            .from('recibos')
-            .update(recibo)
-            .eq('id', id)
-            .select();
-        
-        if (error) throw error;
-        return data[0];
-    },
-    
+        validateRequired(recibo, ['cliente_id', 'servico_id', 'valor', 'forma_pagamento']);
+        return this._executeOperation(
+            () => supabase
+                .from('recibos')
+                .update(recibo)
+                .eq('id', id)
+                .select()
+                .single(),
+            null,
+            true
+        );
+    }
+
     async deleteRecibo(id) {
-        const { error } = await supabase
-            .from('recibos')
-            .delete()
-            .eq('id', id);
-        
-        if (error) throw error;
-        return true;
-    },
-    
-    // Notificações
-    async getNotificacoes() {
-        const { data, error } = await supabase
-            .from('notificacoes')
-            .select('*')
-            .order('data_criacao', { ascending: false })
-            .limit(10);
-        
-        if (error) throw error;
-        return data;
-    },
-    
-    async marcarNotificacaoLida(id) {
-        const { error } = await supabase
-            .from('notificacoes')
-            .update({ lida: true })
-            .eq('id', id);
-        
-        if (error) throw error;
-        return true;
-    },
-    
+        return this._executeOperation(
+            () => supabase
+                .from('recibos')
+                .delete()
+                .eq('id', id),
+            null,
+            true
+        );
+    }
+
     // Autenticação
     async signIn(email, password) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password
-        });
-        
-        if (error) throw error;
-        return data;
-    },
-    
-    async signOut() {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        return true;
-    },
-    
-    async getCurrentUser() {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error) throw error;
-        return user;
+        return this._executeOperation(
+            () => supabase.auth.signInWithPassword({
+                email,
+                password
+            })
+        );
     }
-};
 
-// Exportar a instância da API para o escopo global
-window.api = api;
+    async signOut() {
+        return this._executeOperation(
+            () => supabase.auth.signOut()
+        );
+    }
+
+    async getCurrentUser() {
+        return this._executeOperation(
+            () => supabase.auth.getUser()
+        );
+    }
+
+    // Gerenciamento de subscrições
+    subscribeToChanges(table, callback) {
+        if (!this.subscriptions.has(table)) {
+            this.subscriptions.set(table, []);
+        }
+        this.subscriptions.get(table).push(callback);
+        
+        return () => {
+            const callbacks = this.subscriptions.get(table);
+            const index = callbacks.indexOf(callback);
+            if (index > -1) {
+                callbacks.splice(index, 1);
+            }
+        };
+    }
+}
+
+export default new API();

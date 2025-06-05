@@ -1,11 +1,3 @@
-// Configuração do Supabase
-const SUPABASE_URL = 'https://bnyhgginbhsjeilcclzf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJueWhnZ2luYmhzamVpbGNjbHpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4ODc2MTUsImV4cCI6MjA2NDQ2MzYxNX0.TnW7d8rcCIDuFOszn-wad2rs40QJqKhrplEye0qXAVA';
-
-// Inicialização correta do cliente Supabase
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-window.supabase = supabase;
-
 // Configurações globais
 const config = {
     // Configurações de paginação
@@ -67,7 +59,7 @@ const formatters = {
 };
 
 // Exportar configurações e funções
-window.config = config;
-window.formatters = formatters;
-window.SUPABASE_URL = SUPABASE_URL;
-window.SUPABASE_KEY = SUPABASE_KEY;
+document.addEventListener('DOMContentLoaded', function() {
+    window.config = config;
+    window.formatters = formatters;
+});
