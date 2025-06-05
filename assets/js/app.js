@@ -615,8 +615,8 @@ const App = (() => {
             const servicoData = Object.fromEntries(formData.entries());
             
             // Validação básica
-            if (!servicoData.descricao) {
-                throw new Error('A descrição do serviço é obrigatória');
+           // if (!servicoData.descricao) {
+               // throw new Error('A descrição do serviço é obrigatória');
             }
             
             if (!servicoData.valor) {
