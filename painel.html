@@ -10,21 +10,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/styles.css">
-	
-	<script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    const supabaseUrl = 'https://bnyhgginbhsjeilcclzf.supabase.co'; // substitua pelo seu
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJueWhnZ2luYmhzamVpbGNjbHpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4ODc2MTUsImV4cCI6MjA2NDQ2MzYxNX0.TnW7d8rcCIDuFOszn-wad2rs40QJqKhrplEye0qXAVA'; // substitua pela sua chave pública
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-        // Sem sessão: redireciona para o login
-        window.location.href = 'index.html';
-    }
-</script>
+    
+    <!-- Configuração do Supabase -->
+    <script>
+        // Inicialização do Supabase
+        const SUPABASE_URL = 'https://bnyhgginbhsjeilcclzf.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJueWhnZ2luYmhzamVpbGNjbHpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg4ODc2MTUsImV4cCI6MjA2NDQ2MzYxNX0.TnW7d8rcCIDuFOszn-wad2rs40QJqKhrplEye0qXAVA';
+        
+        // Inicialização do cliente Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        window.supabase = supabase;
+        
+        // Verificar autenticação
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+            }
+            return session;
+        }
+        
+        // Verificar autenticação ao carregar a página
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await checkAuth();
+                console.log('Usuário autenticado');
+            } catch (error) {
+                console.error('Erro na verificação de autenticação:', error);
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
 
 	
     <style>
@@ -358,7 +374,7 @@
                                 <thead>
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição do Serviço</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Técnico</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>

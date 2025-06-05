@@ -263,6 +263,16 @@ html, body {
         min-width: unset;
         font-size: 0.95rem;
     }
+    
+    .login-card {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .login-logo {
+        width: 100px;
+        height: 100px;
+    }
     .glass-card, .stat-card {
         padding: 1rem !important;
         margin: 0.5rem 0;
