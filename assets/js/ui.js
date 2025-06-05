@@ -374,3 +374,38 @@ window.toggleMobileMenu = toggleMobileMenu;
 window.showLoading = showLoading;
 window.hideLoading = hideLoading;
 window.showAlert = showAlert;
+
+async function handleClienteSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const cliente = {
+    nome: form['nome'].value,
+    telefone: form['telefone'].value,
+    email: form['email'].value,
+    endereco: form['endereco'].value,
+    cpf: form['cpf'].value,
+    rg: form['rg'].value,
+    cidade: form['cidade'].value,
+    estado: form['estado'].value,
+    cep: form['cep'].value,
+    observacoes: form['observacoes'].value,
+  };
+  const id = form['id'].value;
+  try {
+    if (id) {
+      await api.updateCliente(id, cliente);
+    } else {
+      await api.createCliente(cliente);
+    }
+    showAlert('Cliente salvo com sucesso!', 'success');
+    hideModal('cliente');
+    await carregarDadosIniciais();
+  } catch (err) {
+    showAlert('Erro ao salvar cliente', 'error');
+  }
+}
+
+function renderizarClientes() {
+  // ... para cada cliente:
+  // cliente.nome, cliente.telefone, cliente.email, cliente.cpf, cliente.rg, cliente.cidade, cliente.estado, cliente.cep, cliente.observacoes
+}

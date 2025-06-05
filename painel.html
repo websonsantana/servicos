@@ -246,39 +246,39 @@
         
         <!-- Menu de Navegação -->
         <nav class="p-4 space-y-1 flex-1">
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg bg-blue-600 text-white">
+            <a href="#" class="menu-item flex items-center px-4 py-3 rounded-lg" data-section="dashboard">
                 <i class="fas fa-home mr-3"></i>
                 <span class="sidebar-text">Dashboard</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+            <a href="#" class="menu-item flex items-center px-4 py-3 rounded-lg" data-section="clientes">
                 <i class="fas fa-users mr-3"></i>
                 <span class="sidebar-text">Clientes</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+            <a href="#" class="menu-item flex items-center px-4 py-3 rounded-lg" data-section="servicos">
                 <i class="fas fa-tools mr-3"></i>
                 <span class="sidebar-text">Serviços</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+            <a href="#" class="menu-item flex items-center px-4 py-3 rounded-lg" data-section="kanban">
                 <i class="fas fa-columns mr-3"></i>
                 <span class="sidebar-text">Kanban</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+            <a href="#" class="menu-item flex items-center px-4 py-3 rounded-lg" data-section="equipe">
                 <i class="fas fa-user-friends mr-3"></i>
                 <span class="sidebar-text">Equipe</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+            <a href="#" class="menu-item flex items-center px-4 py-3 rounded-lg" data-section="orcamentos">
                 <i class="fas fa-file-invoice-dollar mr-3"></i>
                 <span class="sidebar-text">Orçamentos</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+            <a href="#" class="menu-item flex items-center px-4 py-3 rounded-lg" data-section="recibos">
                 <i class="fas fa-receipt mr-3"></i>
                 <span class="sidebar-text">Recibos</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+            <a href="#" class="menu-item flex items-center px-4 py-3 rounded-lg" data-section="relatorios">
                 <i class="fas fa-chart-bar mr-3"></i>
                 <span class="sidebar-text">Relatórios</span>
             </a>
-            <a href="#" class="flex items-center px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+            <a href="#" class="menu-item flex items-center px-4 py-3 rounded-lg" data-section="historico">
                 <i class="fas fa-history mr-3"></i>
                 <span class="sidebar-text">Histórico</span>
             </a>
@@ -356,6 +356,15 @@
                 <div class="mb-8">
                     <h1 class="text-2xl font-bold text-gray-800">Visão Geral</h1>
                     <p class="text-gray-600">Bem-vindo de volta, Admin! Aqui está o que está acontecendo hoje.</p>
+                </div>
+                
+                <!-- Botões para abrir modais -->
+                <div class="flex gap-2 mb-4">
+                    <button class="btn-primary" onclick="App.showModal('cliente')">Novo Cliente</button>
+                    <button class="btn-primary" onclick="App.showModal('servico')">Novo Serviço</button>
+                    <button class="btn-primary" onclick="App.showModal('funcionario')">Novo Funcionário</button>
+                    <button class="btn-primary" onclick="App.showModal('orcamento')">Novo Orçamento</button>
+                    <button class="btn-primary" onclick="App.showModal('recibo')">Novo Recibo</button>
                 </div>
                 
                 <!-- Cartões de Estatísticas -->
